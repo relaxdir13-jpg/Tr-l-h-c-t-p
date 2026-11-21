@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thư Viện Học Tập CNTT &amp; Kỷ Nguyên Số (8 Chương)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    .chapter-card-enter {
+      animation: fadeSlideUp 0.25s ease-out;
+    }
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    /* Tối ưu giao diện khi in hoặc xuất ghi chú */
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .print-break-inside-avoid {
+        break-inside: avoid;
+      }
+      .chapter-section {
+        display: block !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-indigo-100 selection:text-indigo-900">
+
+  <!-- Thanh điều hướng cố định phía trên (Sticky Top Navigation) -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-xs no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-wrap items-center justify-between gap-3 py-3">
+        <!-- Thương hiệu thư viện -->
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <h1 class="text-base sm:text-lg font-bold text-slate-900 truncate">
+              Thư Viện Ôn Tập CNTT &amp; Kỷ Nguyên Số
+            </h1>
+            <p class="text-xs text-slate-500 truncate">
+              8 học phần nền tảng • Tóm tắt, sơ đồ, tự kiểm tra &amp; tra cứu
+            </p>
+          </div>
+        </div>
+
+        <!-- Ô tìm kiếm nhanh & các nút thao tác -->
+        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <div class="relative flex-1 sm:w-64 lg:w-72">
+            <input
+              id="searchInput"
+              type="search"
+              placeholder="Tìm kiếm khái niệm, luật, giao thức..."
+              aria-label="Tìm kiếm trong toàn bộ 8 chương"
+              class="w-full pl-9 pr-8 py-2 text-sm bg-slate-100 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+            />
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
+            </svg>
+            <button
+              id="clearSearchBtn"
+              type="button"
+              title="Xóa từ khóa tìm kiếm"
+              aria-label="Xóa từ khóa tìm kiếm"
+              class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-0.5 rounded-md"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <button
+            id="exportMdBtn"
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition shrink-0"
+            title="Tải bản tóm tắt Markdown (.md)"
+          >
+            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3" />
+            </svg>
+            <span class="hidden md:inline">Xuất .MD</span>
+          </button>
+
+          <button
+            id="printBtn"
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 shadow-xs transition shrink-0"
+            title="In hoặc lưu PDF ghi chú học tập"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2m-10-4h8v8H8v-8z" />
+            </svg>
+            <span class="hidden sm:inline">In / PDF</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Vùng thông báo trạng thái (thay thế alert) -->
+  <div id="statusToast" class="fixed bottom-5 right-5 z-50 hidden max-w-sm bg-slate-900 text-white text-sm px-4 py-3 rounded-xl shadow-lg border border-slate-700 flex items-center gap-2.5 no-print" role="status" aria-live="polite">
+    <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
+    <span id="statusToastText">Đã lưu thay đổi.</span>
+  </div>
+
+  <!-- Nội dung chính -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- 1. Hồ sơ sinh viên (Student Profile Card) có thể chỉnh sửa & lưu localStorage -->
+    <section aria-labelledby="profileHeading" class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 sm:p-6 print-break-inside-avoid">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+        <div>
+          <span class="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg">
+            Hồ sơ học tập cá nhân
+          </span>
+          <h2 id="profileHeading" class="text-lg sm:text-xl font-bold text-slate-900 mt-1.5">
+            Thông tin sinh viên &amp; học phần ôn tập
+          </h2>
+        </div>
+
+        <div class="flex items-center gap-2 self-start sm:self-center no-print">
+          <button
+            id="toggleProfileEditBtn"
+            type="button"
+            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition cursor-pointer"
+          >
+            <svg id="profileEditIcon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            <span id="toggleProfileEditText">Chỉnh sửa hồ sơ</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Chế độ hiển thị hồ sơ -->
+      <div id="profileDisplayView" class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
+          <div class="text-xs font-medium text-slate-500">Họ và tên sinh viên:</div>
+          <div id="displayStudentName" class="text-base font-semibold text-slate-900 mt-1">Chưa cập nhật họ tên</div>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
+          <div class="text-xs font-medium text-slate-500">MSSV:</div>
+          <div id="displayStudentId" class="text-base font-semibold text-slate-900 mt-1">Chưa cập nhật MSSV</div>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
+          <div class="text-xs font-medium text-slate-500">Môn:</div>
+          <div id="displayCourseName" class="text-base font-semibold text-slate-900 mt-1">Nhập môn CNTT &amp; Chuyển đổi số</div>
+        </div>
+      </div>
+
+      <!-- Chế độ chỉnh sửa hồ sơ -->
+      <form id="profileEditForm" class="hidden grid-cols-1 md:grid-cols-3 gap-4 pt-4 no-print">
+        <div>
+          <label for="inputStudentName" class="block text-xs font-semibold text-slate-700 mb-1.5">
+            Họ và tên sinh viên:
+          </label>
+          <input
+            id="inputStudentName"
+            type="text"
+            placeholder="Ví dụ: Nguyễn Minh Anh"
+            class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+        <div>
+          <label for="inputStudentId" class="block text-xs font-semibold text-slate-700 mb-1.5">
+            MSSV:
+          </label>
+          <input
+            id="inputStudentId"
+            type="text"
+            placeholder="Ví dụ: 23520123"
+            class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+        <div>
+          <label for="inputCourseName" class="block text-xs font-semibold text-slate-700 mb-1.5">
+            Môn:
+          </label>
+          <input
+            id="inputCourseName"
+            type="text"
+            placeholder="Ví dụ: Công nghệ thông tin & Kỷ nguyên số"
+            class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+        <div class="md:col-span-3 flex items-center justify-end gap-2 pt-1">
+          <button
+            id="cancelProfileBtn"
+            type="button"
+            class="px-4 py-2 text-sm font-medium rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+          >
+            Hủy
+          </button>
+          <button
+            id="saveProfileBtn"
+            type="submit"
+            class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 shadow-xs transition cursor-pointer"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            Lưu hồ sơ
+          </button>
+        </div>
+      </form>
+
+      <!-- Thanh tiến độ ôn tập nhanh -->
+      <div class="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="text-xs text-slate-600">
+          Tiến độ hoàn thành tự kiểm tra (Quiz): <strong id="progressSummaryText" class="text-indigo-700">0 / 8 chương</strong>
+        </div>
+        <div class="w-full sm:w-64 h-2 bg-slate-100 rounded-full overflow-hidden">
+          <div id="progressBarFill" class="h-full bg-indigo-600 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bộ lọc chương dạng thanh ngang (dễ dùng trên cả di động và màn hình lớn) -->
+    <nav aria-label="Chọn chương ôn tập" class="bg-white rounded-2xl border border-slate-200 shadow-xs p-3 no-print">
+      <div class="flex items-center justify-between gap-2 mb-2.5 px-1">
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Điều hướng học phần</span>
+        <span id="filterResultCount" class="text-xs font-medium text-indigo-600">Hiển thị tất cả 8 chương</span>
+      </div>
+      <div id="chapterFilterTabs" class="flex items-center gap-2 overflow-x-auto pb-1">
+        <!-- Nút lọc sẽ được tạo tự động bằng JS -->
+      </div>
+    </nav>
+
+    <!-- Bố cục chính: Sidebar mục lục (Desktop) + Khu vực nội dung 8 chương -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- Sidebar mục lục chương trên màn hình lớn -->
+      <aside class="hidden lg:block lg:col-span-3 sticky top-20 bg-white rounded-2xl border border-slate-200 shadow-xs p-4 no-print" aria-label="Mục lục 8 chương">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 px-2">
+          Mục lục 8 chương
+        </h2>
+        <ul id="sidebarTocList" class="space-y-1">
+          <!-- Danh sách mục lục được tạo bằng JS -->
+        </ul>
+      </aside>
+
+      <!-- Khu vực hiển thị nội dung các chương -->
+      <div id="chaptersContainer" class="lg:col-span-9 space-y-6">
+        <!-- Các chương được render bằng JS -->
+      </div>
+
+    </div>
+
+    <!-- Thông báo khi không tìm thấy kết quả -->
+    <div id="emptySearchState" class="hidden bg-white rounded-2xl border border-slate-200 p-10 text-center">
+      <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
+        </svg>
+      </div>
+      <h3 class="text-base font-bold text-slate-900">Không tìm thấy nội dung phù hợp</h3>
+      <p class="text-sm text-slate-500 mt-1">Hãy thử từ khóa khác như <span class="font-medium text-slate-700">"OSI"</span>, <span class="font-medium text-slate-700">"Qubit"</span>, <span class="font-medium text-slate-700">"RPA"</span>, <span class="font-medium text-slate-700">"CIA"</span> hoặc <span class="font-medium text-slate-700">"Luật"</span>.</p>
+      <button
+        id="resetFilterBtn"
+        type="button"
+        class="mt-4 px-4 py-2 text-sm font-semibold rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition cursor-pointer"
+      >
+        Xem tất cả 8 chương
+      </button>
+    </div>
+  </main>
+
+  <!-- Chân trang -->
+  <footer class="bg-white border-t border-slate-200 mt-12 py-6 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+      <div>
+        Thư viện ôn tập cá nhân • 8 học phần CNTT &amp; Chuyển đổi số
+      </div>
+      <div>
+        Hỗ trợ lưu hồ sơ cục bộ (localStorage), tìm kiếm tức thì, Flashcard/Quiz &amp; xuất tài liệu.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /**
+     * Dữ liệu đầy đủ 8 chương ôn tập Công nghệ Thông tin & Kỷ nguyên số.
+     * Mỗi chương bao gồm: tóm tắt, các điểm cốt lõi có cấu trúc, bảng/khối so sánh,
+     * sơ đồ SVG trực quan, câu hỏi Flashcard / Self-check Quiz, tài nguyên video YouTube
+     * và các liên kết tham khảo chuẩn xác.
+     */
+    const CHAPTERS_DATA = [
+      {
+        id: 1,
+        code: "Chương 1",
+        title: "Tổng quan về CMCN 4.0, CNTT 4.0 & Chuyển đổi số (CĐS)",
+        badge: "Nền tảng CĐS",
+        summary:
+          "Khái quát tiến trình 4 cuộc Cách mạng công nghiệp, vai trò nền tảng của CNTT 4.0 trong Kinh tế số & Xã hội số, sự khác biệt giữa Tin học hóa và Chuyển đổi số, ba trụ cột (Chính phủ số, Kinh tế số, Xã hội số), tầm nhìn 2025–2030 gắn với UNIDO/SDGs và bộ kỹ năng cần thiết của sinh viên CNTT.",
+        highlights: [
+          {
+            label: "4 cuộc Cách mạng công nghiệp",
+            text: "CMCN 1.0 (~1760–1840): cơ khí hóa, năng lượng hơi nước & dệt may. CMCN 2.0 (~1870–đầu TK 20): điện năng, động cơ điện & dây chuyền sản xuất hàng loạt. CMCN 3.0 (~1970): máy tính, điện tử, công nghệ bán dẫn & tự động hóa. CMCN 4.0 (~2010–nay): kết nối thế giới vật lý – số (CPS), AI, IoT, Big Data, Cloud."
+          },
+          {
+            label: "CNTT 4.0 & Tin học hóa vs. Chuyển đổi số",
+            text: "CNTT 4.0 là hạ tầng và động lực cốt lõi của Kinh tế số & Xã hội số. Tin học hóa tập trung số hóa quy trình/dữ liệu hiện hữu trên máy tính; Chuyển đổi số tái cấu trúc mô hình vận hành, quy trình, văn hóa và giá trị dịch vụ dựa trên dữ liệu và công nghệ số."
+          },
+          {
+            label: "Ba trụ cột & Tầm nhìn 2025–2030",
+            text: "Gồm Chính phủ số (quản trị, dịch vụ công số), Kinh tế số (năng suất, mô hình kinh doanh số) và Xã hội số (công dân số, bình đẳng số). Hướng tới mục tiêu 2025–2030 hài hòa với định hướng công nghiệp hóa bền vững của UNIDO và 17 mục tiêu phát triển bền vững (SDGs)."
+          },
+          {
+            label: "Kỹ năng sinh viên CNTT",
+            text: "Kết hợp năng lực chuyên môn cốt lõi (lập trình, dữ liệu, hệ thống, an toàn thông tin), tư duy giải quyết vấn đề, học tập suốt đời, làm việc liên ngành và đạo đức/trách nhiệm số."
+          }
+        ],
+        table: {
+          headers: ["Giai đoạn / Khía cạnh", "Đặc trưng cốt lõi", "Động lực / Ý nghĩa"],
+          rows: [
+            ["CMCN 1.0 (~1760–1840)", "Cơ khí hóa, máy hơi nước, đường sắt & dệt may", "Chuyển từ lao động thủ công sang cơ khí"],
+            ["CMCN 2.0 (~1870–đầu TK 20)", "Điện năng, sản xuất hàng loạt, dây chuyền lắp ráp", "Tăng quy mô và giảm chi phí đơn vị"],
+            ["CMCN 3.0 (~1970)", "Máy tính, linh kiện điện tử, bán dẫn, tự động hóa", "Tự động hóa từng phần & xử lý thông tin số"],
+            ["CMCN 4.0 (~2010–nay)", "AI, IoT, Big Data, Cloud, liên kết vật lý – số", "Tự chủ, thông minh hóa & đổi mới mô hình số"]
+          ]
+        },
+        diagramType: "ir4",
+        quiz: {
+          question: "Điểm khác biệt cốt lõi giữa 'Tin học hóa' và 'Chuyển đổi số' là gì?",
+          options: [
+            "Tin học hóa dùng đám mây, còn Chuyển đổi số chỉ mua thêm máy tính cá nhân.",
+            "Tin học hóa số hóa/tự động hóa quy trình sẵn có, còn Chuyển đổi số tái cấu trúc mô hình vận hành, quy trình và giá trị dựa trên dữ liệu & công nghệ số.",
+            "Chuyển đổi số chỉ áp dụng cho cơ quan nhà nước, không áp dụng cho doanh nghiệp."
+          ],
+          answerIndex: 1,
+          explanation: "Chuyển đổi số đi xa hơn việc áp dụng CNTT hay tin học hóa rời rạc: nó thay đổi cách thức tạo ra giá trị, vận hành và tương tác dựa trên dữ liệu số."
+        },
+        videos: [
+          {
+            title: "Cách mạng công nghiệp 4.0 và Chuyển đổi số là gì?",
+            query: "Cách mạng công nghiệp 4.0 và chuyển đổi số"
+          },
+          {
+            title: "Kinh tế số, Chính phủ số và Xã hội số",
+            query: "Chính phủ số kinh tế số xã hội số"
+          }
+        ],
+        references: [
+          {
+            title: "Cổng thông tin điện tử Chính phủ – Văn bản quy phạm pháp luật",
+            url: "https://vanban.chinhphu.vn/"
+          },
+          {
+            title: "IEEE Standards Association – Tiêu chuẩn công nghệ & hệ thống",
+            url: "https://standards.ieee.org/"
+          }
+        ]
+      },
+      {
+        id: 2,
+        code: "Chương 2",
+        title: "Kiến trúc & Phần cứng máy tính",
+        badge: "Phần cứng & Kiến trúc",
+        summary:
+          "Trình bày sự phát triển qua 5 thế hệ máy tính, phân loại hệ thống máy tính, chu trình xử lý cơ bản (Input -> Process -> Output -> Storage), cấu tạo và thông số của CPU, RAM, ROM, thiết bị lưu trữ và các xu hướng kiến trúc hiện đại như định luật Moore, Multicore, DSA/TPU và máy tính lượng tử.",
+        highlights: [
+          {
+            label: "5 thế hệ máy tính & Phân loại",
+            text: "Tiến hóa từ Bóng đèn chân không -> Transistor -> Mạch tích hợp (IC) -> Vi xử lý (Microprocessor) -> AI & xử lý song song. Phân loại theo quy mô/mục đích: Siêu máy tính, Mainframe, Server, PC (Desktop, Laptop, Tablet, Smartphone)."
+          },
+          {
+            label: "Mô hình Input -> Process -> Output -> Storage",
+            text: "Thiết bị nhập (bàn phím, chuột, cảm biến, microphone) đưa dữ liệu vào; bộ xử lý thực hiện tính toán/điều khiển; thiết bị xuất (màn hình, máy in, loa) trả kết quả; bộ nhớ/lưu trữ giữ dữ liệu và chương trình."
+          },
+          {
+            label: "CPU, RAM, ROM & Thiết bị lưu trữ",
+            text: "CPU đánh giá qua xung nhịp (GHz), số nhân (Cores), bộ nhớ đệm (Cache) – tiêu biểu Intel Core i3/i5/i7/i9 và AMD Ryzen 3/5/7/9. RAM (DDR4/DDR5, 8GB/16GB/32GB+) là bộ nhớ làm việc dễ bay hơi; ROM chứa BIOS/UEFI, Firmware, PROM, EEPROM/Flash ROM. Lưu trữ gồm HDD (cơ học), SSD, SSD NVMe (PCIe tốc độ cao), USB, thẻ nhớ."
+          },
+          {
+            label: "Xu hướng hiện đại & Lượng tử",
+            text: "Định luật Moore (số bóng bán dẫn trên vi mạch tăng theo cấp số nhân qua các chu kỳ ~18–24 tháng), kiến trúc đa nhân (Multicore), bộ tăng tốc chuyên biệt DSA/TPU cho AI, và máy tính lượng tử với Qubit có tính chồng chập (superposition) khác với Bit cổ điển (0 hoặc 1)."
+          }
+        ],
+        table: {
+          headers: ["Thành phần / Khái niệm", "Đặc điểm nổi bật", "Vai trò / Ví dụ"],
+          rows: [
+            ["CPU (Vi xử lý)", "Xung nhịp (GHz), số nhân (Cores), Cache (L1/L2/L3)", "Intel Core i3/i5/i7/i9; AMD Ryzen 3/5/7/9"],
+            ["RAM vs. ROM", "RAM biến mất khi tắt điện; ROM giữ mã khởi động/cố định", "RAM DDR4/DDR5 (8–32GB+); ROM/UEFI/Flash"],
+            ["Lưu trữ (HDD / SSD / NVMe)", "HDD từ tính cơ học; SSD/NVMe dùng chip nhớ flash/PCIe", "SSD NVMe truy xuất nhanh vượt trội so với HDD"],
+            ["Bit vs. Qubit", "Bit là 0 hoặc 1; Qubit có trạng thái chồng chập", "Máy tính lượng tử giải bài toán đặc thù"]
+          ]
+        },
+        diagramType: "ipo",
+        quiz: {
+          question: "Điểm khác biệt cơ bản giữa RAM và ROM trong hoạt động máy tính là gì?",
+          options: [
+            "RAM là bộ nhớ chỉ đọc chứa BIOS/UEFI, còn ROM là bộ nhớ tạm thời cho ứng dụng đang chạy.",
+            "RAM là bộ nhớ làm việc tạm thời (dữ liệu mất khi ngắt điện), còn ROM lưu chương trình/firmware khởi động bền vững ngay cả khi mất điện.",
+            "RAM có dung lượng cố định vĩnh viễn không nâng cấp được, còn ROM là ổ cứng lưu tệp video."
+          ],
+          answerIndex: 1,
+          explanation: "RAM (như DDR4, DDR5) lưu dữ liệu và lệnh đang xử lý nên mất nội dung khi tắt nguồn; ROM/Flash lưu mã khởi động (BIOS/UEFI) và firmware."
+        },
+        videos: [
+          {
+            title: "Kiến trúc máy tính, CPU, RAM, SSD NVMe hoạt động thế nào?",
+            query: "CPU RAM SSD NVMe hoat dong nhu nao"
+          },
+          {
+            title: "Máy tính lượng tử và Qubit là gì?",
+            query: "May tinh luong tu Qubit la gi"
+          }
+        ],
+        references: [
+          {
+            title: "IEEE Standards Association – Tài liệu & chuẩn kỹ thuật phần cứng/hệ thống",
+            url: "https://standards.ieee.org/"
+          }
+        ]
+      },
+      {
+        id: 3,
+        code: "Chương 3",
+        title: "Hệ điều hành & Môi trường số đa nền tảng",
+        badge: "Hệ điều hành & Ảo hóa",
+        summary:
+          "Giải thích vai trò cầu nối của Hệ điều hành (OS) giữa Người dùng – Ứng dụng – Phần cứng, các kiến trúc hạt nhân (Kernel), chức năng quản lý tài nguyên cốt lõi, thực hành vận hành an toàn/hiệu quả và sự khác biệt giữa Ảo hóa (VM), Containerization (Docker) cùng xu hướng OS tích hợp AI.",
+        highlights: [
+          {
+            label: "Vai trò OS & Kiến trúc hạt nhân",
+            text: "OS là cầu nối Người dùng – Ứng dụng – Phần cứng, nhìn dưới góc độ Người dùng (dễ dùng, giao diện, ứng dụng) và Hệ thống (phân bổ tài nguyên tối ưu). Kiến trúc hạt nhân gồm: Monolithic, Layered, Microkernel và Modular/LKMs (Loadable Kernel Modules)."
+          },
+          {
+            label: "Chức năng cốt lõi của OS",
+            text: "Quản lý tiến trình (Process, lập lịch Scheduling, chuyển ngữ cảnh Context Switch, giao tiếp IPC); Quản lý bộ nhớ (phân trang/phân đoạn, tránh Thrashing); Lưu trữ & I/O (File System, Device Drivers); Bảo vệ (Protection) và Bảo mật (Security, ACL)."
+          },
+          {
+            label: "Vận hành hiệu quả & Môi trường đa nền tảng",
+            text: "Cập nhật vá lỗi thường xuyên, ứng dụng mô hình SaaS, nguyên tắc đặc quyền tối thiểu (Least Privilege), xác thực đa yếu tố (MFA), sao lưu Full/Incremental Backup, Snapshot, theo dõi bằng Task Manager, đồng bộ đám mây đa thiết bị."
+          },
+          {
+            label: "Ảo hóa, Container & AI-Integrated OS",
+            text: "Ảo hóa (Virtualization) dùng Hypervisor tạo máy ảo (VM) có Guest OS riêng; Containerization (Docker) chia sẻ Host OS Kernel, đóng gói ứng dụng + phụ thuộc gọn nhẹ hơn. Xu hướng AI-Integrated OS / Self-learning OS hỗ trợ tự tối ưu và tương tác thông minh."
+          }
+        ],
+        table: {
+          headers: ["Tiêu chí", "Máy ảo (VM – Hypervisor)", "Container (ví dụ: Docker)"],
+          rows: [
+            ["Hạt nhân hệ điều hành", "Mỗi VM chạy một Guest OS độc lập", "Chia sẻ trực tiếp Host OS Kernel"],
+            ["Tài nguyên & Khởi động", "Nặng hơn, khởi động chậm hơn", "Nhẹ hơn, khởi động gần như tức thì"],
+            ["Mức độ cô lập", "Cô lập mạnh ở tầng phần cứng ảo hóa", "Cô lập ở tầng tiến trình/tài nguyên OS"]
+          ]
+        },
+        diagramType: "vmContainer",
+        quiz: {
+          question: "Ưu điểm nổi bật của Container (như Docker) so với máy ảo truyền thống (VM) là gì?",
+          options: [
+            "Container chia sẻ hạt nhân (Kernel) của hệ điều hành máy chủ nên nhẹ và khởi động nhanh hơn.",
+            "Container không cần bất kỳ tệp cấu hình hay thư viện phụ thuộc nào.",
+            "Container thay thế hoàn toàn phần cứng vật lý mà không cần máy chủ."
+          ],
+          answerIndex: 0,
+          explanation: "Container chia sẻ Host OS Kernel thay vì khởi chạy đầy đủ một hệ điều hành khách riêng cho từng phiên bản, giúp tiết kiệm tài nguyên và khởi động nhanh."
+        },
+        videos: [
+          {
+            title: "Hệ điều hành là gì? Tiến trình, bộ nhớ và File System",
+            query: "He dieu hanh la gi process memory"
+          },
+          {
+            title: "So sánh Virtual Machine và Docker Container",
+            query: "So sanh Virtual Machine va Docker Container"
+          }
+        ],
+        references: [
+          {
+            title: "IEEE Standards Association – Chuẩn kỹ thuật hệ thống & phần mềm",
+            url: "https://standards.ieee.org/"
+          }
+        ]
+      },
+      {
+        id: 4,
+        code: "Chương 4",
+        title: "Phần mềm, Đám mây & Nền tảng",
+        badge: "Phần mềm & Cloud",
+        summary:
+          "Định nghĩa phần mềm theo chuẩn IEEE, phân loại phần mềm hệ thống, ứng dụng, cơ bản, chuyên dụng, nhúng (Firmware), nguồn mở và bản quyền; đồng thời hệ thống hóa Điện toán đám mây theo ISO & NIST với 5 đặc tính, 3 mô hình dịch vụ và 4 mô hình triển khai.",
+        highlights: [
+          {
+            label: "Định nghĩa IEEE & Phân loại phần mềm",
+            text: "Theo chuẩn IEEE, phần mềm gồm chương trình máy tính, quy trình, tài liệu liên quan và dữ liệu cấu hình cần thiết. Phân loại theo vai trò: Phần mềm hệ thống vs. Phần mềm ứng dụng; phần mềm cơ bản vs. chuyên dụng; phần mềm nhúng (Firmware); phần mềm nguồn mở (Open Source) và bản quyền thương mại."
+          },
+          {
+            label: "5 đặc tính cốt lõi của Điện toán đám mây (NIST/ISO)",
+            text: "1) Broad Network Access (truy cập mạng rộng khắp); 2) On-demand self-service (tự phục vụ theo nhu cầu); 3) Rapid elasticity (co giãn nhanh chóng); 4) Measured Service (đo lường dịch vụ); 5) Resource pooling (dùng chung/tập hợp tài nguyên)."
+          },
+          {
+            label: "3 mô hình dịch vụ & 4 mô hình triển khai",
+            text: "Dịch vụ: IaaS (hạ tầng), PaaS (nền tảng phát triển), SaaS (phần mềm dịch vụ). Triển khai: Public Cloud, Private Cloud, Hybrid Cloud, Community Cloud, kết hợp chiến lược Multi-cloud."
+          }
+        ],
+        table: {
+          headers: ["Mô hình dịch vụ Cloud", "Người dùng quản lý chính", "Nhà cung cấp quản lý", "Ví dụ điển hình"],
+          rows: [
+            ["IaaS (Infrastructure)", "OS, runtime, dữ liệu, ứng dụng", "Máy chủ ảo, lưu trữ, mạng, ảo hóa", "Thuê máy chủ ảo, ổ đĩa mạng"],
+            ["PaaS (Platform)", "Ứng dụng & dữ liệu", "Hạ tầng, OS, runtime, middleware", "Nền tảng triển khai mã nguồn"],
+            ["SaaS (Software)", "Cấu hình người dùng & dữ liệu", "Toàn bộ ứng dụng, dữ liệu, hạ tầng", "Ứng dụng văn phòng/email đám mây"]
+          ]
+        },
+        diagramType: "cloud",
+        quiz: {
+          question: "Mô hình điện toán đám mây nào cung cấp sẵn ứng dụng hoàn chỉnh qua mạng để người dùng sử dụng ngay?",
+          options: [
+            "SaaS (Software as a Service)",
+            "IaaS (Infrastructure as a Service)",
+            "Firmware nhúng trong vi điều khiển"
+          ],
+          answerIndex: 0,
+          explanation: "SaaS cung cấp phần mềm hoàn chỉnh dưới dạng dịch vụ (như ứng dụng văn phòng, CRM, mail trên cloud), người dùng không cần quản trị hạ tầng hay cài đặt phức tạp."
+        },
+        videos: [
+          {
+            title: "Điện toán đám mây là gì? IaaS, PaaS và SaaS",
+            query: "Dien toan dam may IaaS PaaS SaaS"
+          },
+          {
+            title: "Phần mềm nguồn mở và bản quyền phần mềm",
+            query: "Phan mem nguon mo va ban quyen phan mem"
+          }
+        ],
+        references: [
+          {
+            title: "NIST SP 800-145 – The NIST Definition of Cloud Computing (CSRC)",
+            url: "https://csrc.nist.gov/pubs/sp/800/145/final"
+          },
+          {
+            title: "IEEE Standards Association – Tiêu chuẩn kỹ thuật phần mềm",
+            url: "https://standards.ieee.org/"
+          }
+        ]
+      },
+      {
+        id: 5,
+        code: "Chương 5",
+        title: "Mạng trong kỷ nguyên số & Internet 4.0",
+        badge: "Mạng & Internet",
+        summary:
+          "Tổng hợp kiến thức về mạng máy tính, môi trường truyền dẫn, thiết bị nút mạng, giao thức TCP/UDP, mô hình phân lớp OSI (7 tầng) và TCP/IP, phân biệt LAN/WAN, lịch sử Internet & World Wide Web, mạng không dây/di động, 6G và Internet vạn vật (IoT).",
+        highlights: [
+          {
+            label: "Hạ tầng mạng, Nút mạng & Giao thức",
+            text: "Mạng máy tính kết nối các thiết bị để chia sẻ tài nguyên/dữ liệu qua phương tiện truyền dẫn (cáp đồng, sợi quang, không dây) và nút mạng (Switch chuyển mạch trong mạng nội bộ, Router định tuyến giữa các mạng, Modem điều chế/giải điều chế). Giao thức quy định chuẩn trao đổi: TCP (tin cậy, hướng kết nối, kiểm soát lỗi/luồng) vs. UDP (nhanh, độ trễ thấp, không thiết lập kết nối trước)."
+          },
+          {
+            label: "Mô hình OSI (7 tầng) & TCP/IP",
+            text: "OSI gồm 7 tầng: Vật lý (Physical - Bit), Liên kết dữ liệu (Data Link - Frame), Mạng (Network - Packet/Datagram), Giao vận (Transport - Segment), Phiên (Session), Trình diễn (Presentation), Ứng dụng (Application - Data/Message). Mô hình TCP/IP thực tế gọn hơn (4/5 tầng) ánh xạ trực tiếp tới các chức năng cốt lõi."
+          },
+          {
+            label: "LAN vs. WAN, Internet & World Wide Web",
+            text: "LAN phạm vi hẹp (nhà, trường học, văn phòng); WAN kết nối địa lý rộng lớn. Internet bắt nguồn từ ARPANET (1969), chuẩn hóa TCP/IP (1982); World Wide Web do Tim Berners-Lee đề xuất năm 1991 tại CERN dựa trên siêu văn bản (Hypertext)."
+          },
+          {
+            label: "Không dây, 6G & IoT",
+            text: "Mạng Wi-Fi, di động (4G/5G), hướng tới 6G (băng thông siêu rộng, độ trễ cực thấp, tích hợp AI/cảm biến) kết nối hàng tỷ thiết bị IoT từ nhà thông minh, y tế đến sản xuất công nghiệp."
+          }
+        ],
+        table: {
+          headers: ["Tầng OSI (từ trên xuống)", "Chức năng chính", "Đơn vị dữ liệu (PDU)"],
+          rows: [
+            ["7. Ứng dụng (Application)", "Giao tiếp trực tiếp với ứng dụng/người dùng (HTTP, DNS...)", "Data / Message"],
+            ["6. Trình diễn (Presentation)", "Định dạng, mã hóa, nén dữ liệu", "Data"],
+            ["5. Phiên (Session)", "Thiết lập, duy trì, đồng bộ phiên truyền", "Data"],
+            ["4. Giao vận (Transport)", "Truyền tin đầu-cuối, tin cậy (TCP) hoặc nhanh (UDP)", "Segment / Datagram"],
+            ["3. Mạng (Network)", "Định tuyến liên mạng, địa chỉ logic (IP)", "Packet / Datagram"],
+            ["2. Liên kết dữ liệu (Data Link)", "Truyền trên liên kết vật lý, địa chỉ MAC, khung dữ liệu", "Frame"],
+            ["1. Vật lý (Physical)", "Truyền tín hiệu điện/quang/sóng qua môi trường truyền dẫn", "Bit"]
+          ]
+        },
+        diagramType: "osi",
+        quiz: {
+          question: "Sự khác biệt chính giữa giao thức TCP và UDP ở tầng giao vận là gì?",
+          options: [
+            "TCP ưu tiên độ tin cậy, kiểm soát thứ tự và truyền lại gói tin mất; UDP ưu tiên tốc độ và độ trễ thấp (phù hợp livestream, game thời gian thực).",
+            "TCP chỉ chạy trên cáp quang, còn UDP chỉ chạy trên Wi-Fi.",
+            "UDP mã hóa toàn bộ dữ liệu mặc định, còn TCP không truyền được văn bản."
+          ],
+          answerIndex: 0,
+          explanation: "TCP đảm bảo truyền tin cậy và đúng thứ tự, trong khi UDP giảm chi phí thiết lập/kiểm soát để đạt tốc độ cao và độ trễ thấp."
+        },
+        videos: [
+          {
+            title: "Mô hình mạng OSI 7 tầng và TCP/IP dễ hiểu",
+            query: "Mo hinh mang OSI 7 tang va TCP IP"
+          },
+          {
+            title: "TCP vs UDP, Router và Switch hoạt động thế nào?",
+            query: "TCP vs UDP Router Switch"
+          }
+        ],
+        references: [
+          {
+            title: "IEEE Standards Association – Tiêu chuẩn truyền thông & mạng",
+            url: "https://standards.ieee.org/"
+          }
+        ]
+      },
+      {
+        id: 6,
+        code: "Chương 6",
+        title: "Tư duy lập trình & Tự động hóa",
+        badge: "Tư duy & Tự động hóa",
+        summary:
+          "Trình bày 4 trụ cột Tư duy lập trình (Computational Thinking), nguyên lý 'máy tính khuếch đại trí tuệ nhưng không tự có trí tuệ', các cấp độ tự động hóa IT (BPA, RPA, IaC) qua ví dụ onboarding nhân sự, và các phương thức phát triển nhanh Low-code, No-code, Vibe-code.",
+        highlights: [
+          {
+            label: "Tư duy lập trình (Computational Thinking)",
+            text: "Gồm 4 bước cốt lõi: Phân rã (Decomposition – chia bài toán lớn thành bài toán con), Nhận diện mẫu / sự tương đồng (Pattern Recognition), Trừu tượng hóa (Abstraction – giữ bản chất, bỏ chi tiết dư thừa) và Thiết kế thuật toán (Algorithm – chuỗi bước rõ ràng, hữu hạn, chính xác). Máy tính khuếch đại trí tuệ con người nhưng không tự có trí tuệ hay mục đích tự thân."
+          },
+          {
+            label: "Tự động hóa IT: BPA, RPA & IaC",
+            text: "BPA (Business Process Automation) tự động hóa quy trình nghiệp vụ xuyên phòng ban/hệ thống; RPA (Robotic Process Automation) dùng 'robot phần mềm' mô phỏng thao tác giao diện/ứng dụng lặp lại; IaC (Infrastructure as Code) khai báo và cấp phát hạ tầng mạng/máy chủ bằng mã. Ví dụ onboarding nhân sự: tạo tài khoản, cấp quyền, gửi tài liệu, cấp phát thiết bị/môi trường làm việc tự động hóa."
+          },
+          {
+            label: "Low-code, No-code & Vibe-code",
+            text: "No-code xây dựng ứng dụng bằng kéo-thả trực quan không cần viết mã; Low-code kết hợp giao diện trực quan với các đoạn mã tùy biến; Vibe-code là cách xây dựng/tinh chỉnh phần mềm nhanh thông qua đối thoại ngôn ngữ tự nhiên với trợ lý AI, kiểm thử và lặp lại liên tục."
+          }
+        ],
+        table: {
+          headers: ["Cấp độ / Phương pháp", "Trọng tâm áp dụng", "Ví dụ / Đặc điểm"],
+          rows: [
+            ["BPA (Quy trình nghiệp vụ)", "Luồng công việc đa bước, đa hệ thống", "Tự động hóa chuỗi phê duyệt & tiếp nhận nhân sự"],
+            ["RPA (Tác vụ ứng dụng)", "Thao tác lặp lại trên giao diện/ứng dụng", "Tự động trích xuất dữ liệu & nhập lên hệ thống"],
+            ["IaC (Hạ tầng dưới dạng mã)", "Cấp phát, cấu hình máy chủ, mạng, cloud", "Khai báo môi trường chuẩn hóa, lặp lại được"],
+            ["No-code / Low-code / Vibe-code", "Tăng tốc tạo ứng dụng & nguyên mẫu", "Kéo-thả, viết ít mã hoặc điều phối tạo mã bằng AI"]
+          ]
+        },
+        diagramType: "ct",
+        quiz: {
+          question: "Trong Tư duy lập trình, bước 'Trừu tượng hóa' (Abstraction) có ý nghĩa gì?",
+          options: [
+            "Tập trung vào các yếu tố bản chất cần cho bài toán và gạt bỏ các chi tiết không liên quan/quá phức tạp.",
+            "Chuyển toàn bộ mã nguồn sang hệ nhị phân bằng tay.",
+            "Bỏ qua việc kiểm thử thuật toán."
+          ],
+          answerIndex: 0,
+          explanation: "Trừu tượng hóa giúp mô hình hóa đúng bản chất bài toán, giảm nhiễu từ chi tiết thừa để thiết kế giải pháp rõ ràng và tái sử dụng được."
+        },
+        videos: [
+          {
+            title: "Tư duy lập trình (Computational Thinking) là gì?",
+            query: "Tu duy lap trinh Computational Thinking"
+          },
+          {
+            title: "RPA, IaC và No-code/Low-code trong tự động hóa",
+            query: "RPA IaC No code Low code"
+          }
+        ],
+        references: [
+          {
+            title: "IEEE Standards Association – Tiêu chuẩn kỹ thuật & quy trình hệ thống",
+            url: "https://standards.ieee.org/"
+          }
+        ]
+      },
+      {
+        id: 7,
+        code: "Chương 7",
+        title: "Trí tuệ nhân tạo, Dữ liệu & Ứng dụng",
+        badge: "AI & Dữ liệu",
+        summary:
+          "Tổng quan về Trí tuệ nhân tạo (AI) và tác động đa chiều, nghệ thuật và kỹ thuật thiết kế Prompt (Prompt Engineering), mối quan hệ giữa Dữ liệu/Big Data với AI và chính sách lấy con người làm trung tâm hướng tới Phát triển bền vững, cùng ứng dụng thực tiễn trong học tập và công việc.",
+        highlights: [
+          {
+            label: "Tổng quan AI & Tác động",
+            text: "AI mô phỏng các năng lực nhận thức, học tập, suy luận, xử lý ngôn ngữ và ra quyết định của con người trên máy tính. AI mang lại năng suất, tự động hóa và đổi mới sáng tạo lớn, đồng thời đặt ra yêu cầu về độ tin cậy, minh bạch, quyền riêng tư và kiểm soát rủi ro."
+          },
+          {
+            label: "Prompt & Prompt Engineering",
+            text: "Prompt là chỉ dẫn/đầu vào giao tiếp với mô hình AI; Prompt Engineering là kỹ thuật thiết kế cấu trúc prompt rõ ràng. Một cấu trúc prompt hoàn chỉnh thường gồm: Vai trò (Role), Ngữ cảnh (Context), Nhiệm vụ (Task), Định dạng đầu ra (Format) và Ràng buộc/Tiêu chí (Constraints/Tone)."
+          },
+          {
+            label: "Dữ liệu, Big Data, AI & Phát triển bền vững",
+            text: "Dữ liệu và Big Data là 'nhiên liệu/nguyên liệu thô', AI là 'động cơ' khai thác tri thức, còn chính sách lấy con người làm trung tâm định hướng công nghệ phục vụ con người và Phát triển bền vững (kinh tế, xã hội, môi trường/AI xanh)."
+          },
+          {
+            label: "Ứng dụng trong học tập & công việc",
+            text: "Hỗ trợ tóm tắt tài liệu, giải thích khái niệm, lập dàn ý, gợi ý mã/kiểm thử, phân tích dữ liệu sơ bộ – luôn kèm bước kiểm chứng nguồn tin và tư duy phản biện của người học/người làm việc."
+          }
+        ],
+        table: {
+          headers: ["Thành phần Prompt", "Chức năng", "Ví dụ minh họa ngắn"],
+          rows: [
+            ["Vai trò (Role)", "Định hình góc nhìn chuyên môn", "Bạn là gia sư môn Kiến trúc máy tính"],
+            ["Ngữ cảnh (Context)", "Cung cấp nền tảng & dữ liệu đầu vào", "Sinh viên năm nhất đang ôn tập trước kỳ thi"],
+            ["Nhiệm vụ (Task)", "Nêu rõ hành động cần thực hiện", "So sánh điểm khác nhau giữa RAM và SSD NVMe"],
+            ["Định dạng & Ràng buộc", "Quy định cấu trúc, độ dài, chuẩn xác", "Lập bảng 3 cột, ngắn gọn, nêu rõ phần chưa chắc chắn"]
+          ]
+        },
+        diagramType: "aiData",
+        quiz: {
+          question: "Trong mối quan hệ giữa Dữ liệu/Big Data, AI và Phát triển bền vững, yếu tố nào giữ vai trò định hướng giá trị?",
+          options: [
+            "Chính sách lấy con người làm trung tâm hướng tới Phát triển bền vững (cùng sự kiểm soát và trách nhiệm của con người).",
+            "Tăng kích thước mô hình vô điều kiện mà không cần kiểm soát rủi ro.",
+            "Loại bỏ hoàn toàn sự giám sát của con người."
+          ],
+          answerIndex: 0,
+          explanation: "Dữ liệu là nguyên liệu, AI là công cụ xử lý/suy luận, còn định hướng lấy con người làm trung tâm và phát triển bền vững bảo đảm AI phục vụ lợi ích con người và xã hội."
+        },
+        videos: [
+          {
+            title: "Prompt Engineering là gì? Cách viết prompt hiệu quả",
+            query: "Prompt Engineering la gi cach viet prompt"
+          },
+          {
+            title: "Big Data và Trí tuệ nhân tạo ứng dụng thực tế",
+            query: "Big Data va Tri tue nhan tao ung dung"
+          }
+        ],
+        references: [
+          {
+            title: "Cổng thông tin điện tử Chính phủ – Luật Trí tuệ nhân tạo số 134/2025/QH15",
+            url: "https://vanban.chinhphu.vn/?pageid=27160&docid=216334&classid=1&typegroupid=3"
+          },
+          {
+            title: "Thư viện Pháp luật – Luật Trí tuệ nhân tạo 2025 số 134/2025/QH15",
+            url: "https://thuvienphapluat.vn/van-ban/Cong-nghe-thong-tin/Luat-Tri-tue-nhan-tao-2025-so-134-2025-QH15-679013.aspx"
+          }
+        ]
+      },
+      {
+        id: 8,
+        code: "Chương 8",
+        title: "An toàn thông tin & Đạo đức số",
+        badge: "An toàn & Pháp lý số",
+        summary:
+          "Hệ thống hóa bộ ba An toàn thông tin CIA, quản trị ISMS theo ISO 27000 & TCVN, chuẩn mực đạo đức & trách nhiệm số, cảnh giác với Deepfake và các mốc pháp lý quan trọng của Việt Nam: Luật An ninh mạng số 24/2018/QH14, Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15 và Luật Trí tuệ nhân tạo số 134/2025/QH15.",
+        highlights: [
+          {
+            label: "Bộ ba CIA & ISMS (ISO 27000 / TCVN)",
+            text: "CIA gồm: Confidentiality (Tính bí mật – chỉ người/hệ thống được phép mới truy cập), Integrity (Tính toàn vẹn – dữ liệu/hệ thống chính xác, không bị sửa đổi trái phép) và Availability (Tính sẵn sàng – thông tin/dịch vụ sẵn sàng khi cần). ISMS theo họ tiêu chuẩn ISO/IEC 27000 và TCVN thiết lập quy trình quản lý rủi ro an toàn thông tin liên tục."
+          },
+          {
+            label: "Đạo đức số, Trách nhiệm số & Deepfake",
+            text: "Tôn trọng bản quyền, quyền riêng tư, sự thật, tính liêm chính học thuật và không gây hại trên môi trường số. Deepfake là công nghệ tổng hợp/biến đổi hình ảnh, âm thanh, video giả mạo chân thực – tiềm ẩn nguy cơ lừa đảo, bôi nhọ, thao túng thông tin nên cần kiểm chứng đa nguồn và tuân thủ pháp luật."
+          },
+          {
+            label: "Các đạo luật nổi bật của Việt Nam",
+            text: "Luật An ninh mạng số 24/2018/QH14 (có hiệu lực 01/01/2019); Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15 (có hiệu lực 01/01/2026); Luật Trí tuệ nhân tạo số 134/2025/QH15 (có hiệu lực 01/03/2026)."
+          }
+        ],
+        table: {
+          headers: ["Văn bản / Tiêu chuẩn", "Số hiệu / Mã chuẩn", "Hiệu lực / Trọng tâm chính"],
+          rows: [
+            ["Luật An ninh mạng", "Số 24/2018/QH14", "Hiệu lực 01/01/2019; bảo vệ an ninh quốc gia & trật tự an toàn xã hội trên không gian mạng"],
+            ["Luật Bảo vệ dữ liệu cá nhân", "Số 91/2025/QH15", "Hiệu lực 01/01/2026; bảo vệ dữ liệu cá nhân cơ bản & nhạy cảm, quyền chủ thể dữ liệu, sự đồng ý"],
+            ["Luật Trí tuệ nhân tạo", "Số 134/2025/QH15", "Hiệu lực 01/03/2026; phát triển, triển khai & sử dụng AI an toàn, minh bạch, lấy con người làm trung tâm"],
+            ["ISMS & Bộ ba CIA", "ISO 27000 / TCVN", "Confidentiality – Integrity – Availability & quản trị rủi ro an toàn thông tin"]
+          ]
+        },
+        diagramType: "cia",
+        quiz: {
+          question: "Trong bộ ba An toàn thông tin CIA, 'Integrity' (Tính toàn vẹn) bảo vệ điều gì?",
+          options: [
+            "Bảo đảm dữ liệu và hệ thống không bị thay đổi, phá hoại hoặc làm sai lệch trái phép.",
+            "Bảo đảm máy chủ luôn tắt vào ban đêm để tiết kiệm điện.",
+            "Chỉ cho phép truy cập dữ liệu qua mạng công cộng không mật khẩu."
+          ],
+          answerIndex: 0,
+          explanation: "Tính toàn vẹn (Integrity) bảo đảm tính chính xác, nguyên vẹn của thông tin và phương tiện xử lý, ngăn chặn sửa đổi trái phép."
+        },
+        videos: [
+          {
+            title: "Bộ ba CIA trong An toàn thông tin là gì?",
+            query: "Bo ba CIA trong an toan thong tin"
+          },
+          {
+            title: "Deepfake là gì và cách nhận biết lừa đảo Deepfake",
+            query: "Deepfake la gi cach nhan biet"
+          }
+        ],
+        references: [
+          {
+            title: "Luật Bảo vệ dữ liệu cá nhân năm 2025 số 91/2025/QH15 – Thư viện Pháp luật",
+            url: "https://thuvienphapluat.vn/van-ban/Bo-may-hanh-chinh/Luat-Bao-ve-du-lieu-ca-nhan-2025-so-91-2025-QH15-625628.aspx"
+          },
+          {
+            title: "Luật An ninh mạng 2018 số 24/2018/QH14 – LuatVietnam",
+            url: "https://luatvietnam.vn/an-ninh-quoc-gia/luat-an-ninh-mang-2018-so-24-2018-qh14-164904-d1.html"
+          },
+          {
+            title: "Luật Trí tuệ nhân tạo số 134/2025/QH15 – Cổng TTĐT Chính phủ",
+            url: "https://vanban.chinhphu.vn/?pageid=27160&docid=216334&classid=1&typegroupid=3"
+          }
+        ]
+      }
+    ];
+
+    // Khóa lưu trữ localStorage
+    const STORAGE_KEYS = {
+      PROFILE: "vn_it_study_hub_profile_v1",
+      QUIZ_DONE: "vn_it_study_hub_quiz_done_v1"
+    };
+
+    // Trạng thái ứng dụng
+    const state = {
+      selectedChapterId: "ALL",
+      searchQuery: "",
+      profile: {
+        name: "",
+        studentId: "",
+        course: "Nhập môn Công nghệ thông tin & Chuyển đổi số"
+      },
+      quizCompleted: {} // { [chapterId]: boolean }
+    };
+
+    /**
+     * Hiển thị thông báo ngắn gọn góc dưới phải (thay thế alert).
+     */
+    function showToast(message) {
+      const toast = document.getElementById("statusToast");
+      const toastText = document.getElementById("statusToastText");
+      if (!toast || !toastText) return;
+      toastText.textContent = message;
+      toast.classList.remove("hidden");
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        toast.classList.add("hidden");
+      }, 2600);
+    }
+
+    /**
+     * Tải hồ sơ sinh viên và tiến độ quiz từ localStorage an toàn.
+     */
+    function loadPersistedState() {
+      try {
+        const rawProfile = localStorage.getItem(STORAGE_KEYS.PROFILE);
+        if (rawProfile) {
+          const parsed = JSON.parse(rawProfile);
+          state.profile = {
+            name: typeof parsed.name === "string" ? parsed.name : "",
+            studentId: typeof parsed.studentId === "string" ? parsed.studentId : "",
+            course: typeof parsed.course === "string" && parsed.course.trim()
+              ? parsed.course
+              : "Nhập môn Công nghệ thông tin & Chuyển đổi số"
+          };
+        }
+      } catch (err) {
+        console.warn("Không thể đọc hồ sơ từ localStorage:", err);
+      }
+
+      try {
+        const rawQuiz = localStorage.getItem(STORAGE_KEYS.QUIZ_DONE);
+        if (rawQuiz) {
+          const parsedQuiz = JSON.parse(rawQuiz);
+          if (parsedQuiz && typeof parsedQuiz === "object") {
+            state.quizCompleted = parsedQuiz;
+          }
+        }
+      } catch (err) {
+        console.warn("Không thể đọc tiến độ quiz từ localStorage:", err);
+      }
+    }
+
+    /**
+     * Lưu hồ sơ sinh viên vào localStorage.
+     */
+    function saveProfileToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(state.profile));
+      } catch (err) {
+        console.warn("Không thể lưu hồ sơ vào localStorage:", err);
+      }
+    }
+
+    /**
+     * Lưu tiến độ quiz vào localStorage.
+     */
+    function saveQuizProgressToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEYS.QUIZ_DONE, JSON.stringify(state.quizCompleted));
+      } catch (err) {
+        console.warn("Không thể lưu tiến độ quiz:", err);
+      }
+    }
+
+    /**
+     * Cập nhật giao diện hiển thị hồ sơ sinh viên và thanh tiến độ.
+     */
+    function renderProfileView() {
+      const displayName = document.getElementById("displayStudentName");
+      const displayId = document.getElementById("displayStudentId");
+      const displayCourse = document.getElementById("displayCourseName");
+
+      const inputName = document.getElementById("inputStudentName");
+      const inputId = document.getElementById("inputStudentId");
+      const inputCourse = document.getElementById("inputCourseName");
+
+      displayName.textContent = state.profile.name.trim() || "Chưa cập nhật họ tên";
+      displayId.textContent = state.profile.studentId.trim() || "Chưa cập nhật MSSV";
+      displayCourse.textContent = state.profile.course.trim() || "Chưa cập nhật môn học";
+
+      inputName.value = state.profile.name;
+      inputId.value = state.profile.studentId;
+      inputCourse.value = state.profile.course;
+
+      updateProgressBar();
+    }
+
+    /**
+     * Cập nhật thanh tiến độ ôn tập dựa trên số chương đã hoàn thành quiz.
+     */
+    function updateProgressBar() {
+      const total = CHAPTERS_DATA.length;
+      const doneCount = CHAPTERS_DATA.filter((ch) => Boolean(state.quizCompleted[ch.id])).length;
+      const pct = Math.round((doneCount / total) * 100);
+
+      const summaryText = document.getElementById("progressSummaryText");
+      const barFill = document.getElementById("progressBarFill");
+
+      if (summaryText) summaryText.textContent = `${doneCount} / ${total} chương (${pct}%)`;
+      if (barFill) barFill.style.width = `${pct}%`;
+    }
+
+    /**
+     * Sinh sơ đồ SVG trực quan đặc trưng cho từng chương.
+     */
+    function renderDiagramSvg(type) {
+      switch (type) {
+        case "ir4":
+          return `
+            <svg viewBox="0 0 640 135" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="Sơ đồ tiến trình 4 cuộc cách mạng công nghiệp">
+              <line x1="65" y1="54" x2="575" y2="54" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="5 4" />
+              <g transform="translate(20,22)">
+                <rect width="128" height="64" rx="10" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5" />
+                <text x="64" y="25" text-anchor="middle" font-size="12" font-weight="700" fill="#1e293b">CMCN 1.0</text>
+                <text x="64" y="43" text-anchor="middle" font-size="10.5" fill="#475569">Hơi nước &amp; Cơ khí</text>
+                <text x="64" y="79" text-anchor="middle" font-size="10" fill="#64748b">~1760 – 1840</text>
+              </g>
+              <g transform="translate(176,22)">
+                <rect width="128" height="64" rx="10" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5" />
+                <text x="64" y="25" text-anchor="middle" font-size="12" font-weight="700" fill="#1e293b">CMCN 2.0</text>
+                <text x="64" y="43" text-anchor="middle" font-size="10.5" fill="#475569">Điện &amp; Sản xuất loạt</text>
+                <text x="64" y="79" text-anchor="middle" font-size="10" fill="#64748b">~1870 – đầu TK 20</text>
+              </g>
+              <g transform="translate(332,22)">
+                <rect width="128" height="64" rx="10" fill="#ffffff" stroke="#6366f1" stroke-width="1.5" />
+                <text x="64" y="25" text-anchor="middle" font-size="12" font-weight="700" fill="#312e81">CMCN 3.0</text>
+                <text x="64" y="43" text-anchor="middle" font-size="10.5" fill="#4338ca">Máy tính &amp; Bán dẫn</text>
+                <text x="64" y="79" text-anchor="middle" font-size="10" fill="#64748b">~1970</text>
+              </g>
+              <g transform="translate(488,22)">
+                <rect width="132" height="64" rx="10" fill="#eef2ff" stroke="#4f46e5" stroke-width="2" />
+                <text x="66" y="25" text-anchor="middle" font-size="12" font-weight="800" fill="#4338ca">CMCN 4.0</text>
+                <text x="66" y="43" text-anchor="middle" font-size="10.5" fill="#3730a3">AI, IoT, Big Data, Cloud</text>
+                <text x="66" y="79" text-anchor="middle" font-size="10" font-weight="600" fill="#4f46e5">~2010 – Nay</text>
+              </g>
+            </svg>`;
+        case "ipo":
+          return `
+            <svg viewBox="0 0 640 125" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="Sơ đồ mô hình xử lý máy tính Input Process Output Storage">
+              <rect x="20" y="28" width="130" height="64" rx="10" fill="#ffffff" stroke="#0ea5e9" stroke-width="1.8" />
+              <text x="85" y="53" text-anchor="middle" font-size="12" font-weight="700" fill="#0369a1">1. INPUT</text>
+              <text x="85" y="72" text-anchor="middle" font-size="10.5" fill="#475569">Nhập &amp; Cảm biến</text>
+
+              <path d="M155 60 L182 60" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)" />
+              <rect x="186" y="28" width="144" height="64" rx="10" fill="#eef2ff" stroke="#4f46e5" stroke-width="2" />
+              <text x="258" y="53" text-anchor="middle" font-size="12" font-weight="800" fill="#3730a3">2. PROCESS</text>
+              <text x="258" y="72" text-anchor="middle" font-size="10.5" fill="#312e81">CPU (GHz, Cores) &amp; RAM</text>
+
+              <path d="M335 60 L362 60" stroke="#64748b" stroke-width="2" />
+              <rect x="366" y="28" width="122" height="64" rx="10" fill="#ffffff" stroke="#10b981" stroke-width="1.8" />
+              <text x="427" y="53" text-anchor="middle" font-size="12" font-weight="700" fill="#047857">3. OUTPUT</text>
+              <text x="427" y="72" text-anchor="middle" font-size="10.5" fill="#475569">Màn hình, In, Loa</text>
+
+              <path d="M258 96 L258 112 L556 112 L556 96" fill="none" stroke="#94a3b8" stroke-width="1.6" stroke-dasharray="4 3" />
+              <rect x="502" y="28" width="118" height="64" rx="10" fill="#fefce8" stroke="#eab308" stroke-width="1.8" />
+              <text x="561" y="53" text-anchor="middle" font-size="12" font-weight="700" fill="#a16207">4. STORAGE</text>
+              <text x="561" y="72" text-anchor="middle" font-size="10.5" fill="#475569">NVMe, SSD, HDD</text>
+            </svg>`;
+        case "vmContainer":
+          return `
+            <svg viewBox="0 0 640 130" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="Sơ đồ so sánh Máy ảo VM và Container">
+              <rect x="20" y="14" width="290" height="102" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
+              <text x="165" y="34" text-anchor="middle" font-size="12" font-weight="700" fill="#1e293b">Máy ảo (VM) – Hypervisor</text>
+              <rect x="34" y="44" width="82" height="36" rx="6" fill="#e0e7ff" stroke="#6366f1" />
+              <text x="75" y="66" text-anchor="middle" font-size="10" font-weight="600" fill="#312e81">App + Guest OS</text>
+              <rect x="124" y="44" width="82" height="36" rx="6" fill="#e0e7ff" stroke="#6366f1" />
+              <text x="165" y="66" text-anchor="middle" font-size="10" font-weight="600" fill="#312e81">App + Guest OS</text>
+              <rect x="214" y="44" width="82" height="36" rx="6" fill="#e0e7ff" stroke="#6366f1" />
+              <text x="255" y="66" text-anchor="middle" font-size="10" font-weight="600" fill="#312e81">App + Guest OS</text>
+              <rect x="34" y="86" width="262" height="20" rx="5" fill="#f1f5f9" stroke="#94a3b8" />
+              <text x="165" y="100" text-anchor="middle" font-size="10" font-weight="600" fill="#334155">Hypervisor / Hạ tầng vật lý</text>
+
+              <rect x="330" y="14" width="290" height="102" rx="10" fill="#ffffff" stroke="#a5b4fc" stroke-width="1.5" />
+              <text x="475" y="34" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">Container (Docker) – Chia sẻ Kernel</text>
+              <rect x="344" y="44" width="82" height="36" rx="6" fill="#dcfce7" stroke="#10b981" />
+              <text x="385" y="66" text-anchor="middle" font-size="10" font-weight="600" fill="#065f46">Container A</text>
+              <rect x="434" y="44" width="82" height="36" rx="6" fill="#dcfce7" stroke="#10b981" />
+              <text x="475" y="66" text-anchor="middle" font-size="10" font-weight="600" fill="#065f46">Container B</text>
+              <rect x="524" y="44" width="82" height="36" rx="6" fill="#dcfce7" stroke="#10b981" />
+              <text x="565" y="66" text-anchor="middle" font-size="10" font-weight="600" fill="#065f46">Container C</text>
+              <rect x="344" y="86" width="262" height="20" rx="5" fill="#eef2ff" stroke="#6366f1" />
+              <text x="475" y="100" text-anchor="middle" font-size="10" font-weight="600" fill="#312e81">Container Engine + Host OS Kernel</text>
+            </svg>`;
+        case "cloud":
+          return `
+            <svg viewBox="0 0 640 120" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="Sơ đồ mô hình dịch vụ đám mây IaaS PaaS SaaS">
+              <rect x="24" y="22" width="180" height="76" rx="10" fill="#ffffff" stroke="#3b82f6" stroke-width="1.8" />
+              <text x="114" y="48" text-anchor="middle" font-size="12" font-weight="800" fill="#1d4ed8">IaaS</text>
+              <text x="114" y="67" text-anchor="middle" font-size="10.5" fill="#334155">Hạ tầng máy chủ, mạng,</text>
+              <text x="114" y="81" text-anchor="middle" font-size="10.5" fill="#334155">lưu trữ ảo hóa</text>
+
+              <rect x="230" y="22" width="180" height="76" rx="10" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8" />
+              <text x="320" y="48" text-anchor="middle" font-size="12" font-weight="800" fill="#4338ca">PaaS</text>
+              <text x="320" y="67" text-anchor="middle" font-size="10.5" fill="#334155">Nền tảng phát triển &amp;</text>
+              <text x="320" y="81" text-anchor="middle" font-size="10.5" fill="#334155">triển khai ứng dụng</text>
+
+              <rect x="436" y="22" width="180" height="76" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.8" />
+              <text x="526" y="48" text-anchor="middle" font-size="12" font-weight="800" fill="#047857">SaaS</text>
+              <text x="526" y="67" text-anchor="middle" font-size="10.5" fill="#334155">Phần mềm hoàn chỉnh</text>
+              <text x="526" y="81" text-anchor="middle" font-size="10.5" fill="#334155">sử dụng trực tuyến</text>
+            </svg>`;
+        case "osi":
+          return `
+            <svg viewBox="0 0 640 115" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="Sơ đồ luồng đóng gói dữ liệu qua các tầng mạng">
+              <rect x="20" y="26" width="136" height="62" rx="10" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6" />
+              <text x="88" y="51" text-anchor="middle" font-size="11" font-weight="700" fill="#3730a3">Tầng 7–5</text>
+              <text x="88" y="69" text-anchor="middle" font-size="10.5" fill="#334155">Data / Message</text>
+
+              <rect x="176" y="26" width="136" height="62" rx="10" fill="#ffffff" stroke="#0284c7" stroke-width="1.6" />
+              <text x="244" y="51" text-anchor="middle" font-size="11" font-weight="700" fill="#0369a1">Tầng 4 (TCP/UDP)</text>
+              <text x="244" y="69" text-anchor="middle" font-size="10.5" fill="#334155">Segment / Datagram</text>
+
+              <rect x="332" y="26" width="136" height="62" rx="10" fill="#ffffff" stroke="#0d9488" stroke-width="1.6" />
+              <text x="400" y="51" text-anchor="middle" font-size="11" font-weight="700" fill="#0f766e">Tầng 3 &amp; 2</text>
+              <text x="400" y="69" text-anchor="middle" font-size="10.5" fill="#334155">Packet &amp; Frame</text>
+
+              <rect x="488" y="26" width="132" height="62" rx="10" fill="#f8fafc" stroke="#64748b" stroke-width="1.6" />
+              <text x="554" y="51" text-anchor="middle" font-size="11" font-weight="700" fill="#1e293b">Tầng 1 (Vật lý)</text>
+              <text x="554" y="69" text-anchor="middle" font-size="10.5" fill="#475569">Bit (Quang/Điện/Sóng)</text>
+            </svg>`;
+        case "ct":
+          return `
+            <svg viewBox="0 0 640 115" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="Sơ đồ 4 bước Tư duy lập trình Computational Thinking">
+              <rect x="18" y="25" width="138" height="64" rx="10" fill="#ffffff" stroke="#6366f1" stroke-width="1.6" />
+              <text x="87" y="51" text-anchor="middle" font-size="11" font-weight="700" fill="#312e81">1. Phân rã</text>
+              <text x="87" y="69" text-anchor="middle" font-size="10" fill="#475569">Chia nhỏ bài toán</text>
+
+              <rect x="174" y="25" width="138" height="64" rx="10" fill="#ffffff" stroke="#6366f1" stroke-width="1.6" />
+              <text x="243" y="51" text-anchor="middle" font-size="11" font-weight="700" fill="#312e81">2. Nhận diện mẫu</text>
+              <text x="243" y="69" text-anchor="middle" font-size="10" fill="#475569">Tìm quy luật tương đồng</text>
+
+              <rect x="330" y="25" width="138" height="64" rx="10" fill="#ffffff" stroke="#6366f1" stroke-width="1.6" />
+              <text x="399" y="51" text-anchor="middle" font-size="11" font-weight="700" fill="#312e81">3. Trừu tượng hóa</text>
+              <text x="399" y="69" text-anchor="middle" font-size="10" fill="#475569">Lọc yếu tố cốt lõi</text>
+
+              <rect x="486" y="25" width="136" height="64" rx="10" fill="#eef2ff" stroke="#4338ca" stroke-width="2" />
+              <text x="554" y="51" text-anchor="middle" font-size="11" font-weight="800" fill="#3730a3">4. Thuật toán</text>
+              <text x="554" y="69" text-anchor="middle" font-size="10" fill="#312e81">Chuỗi bước chính xác</text>
+            </svg>`;
+        case "aiData":
+          return `
+            <svg viewBox="0 0 640 115" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="Sơ đồ mối liên hệ Dữ liệu, AI và Phát triển bền vững">
+              <rect x="24" y="25" width="174" height="64" rx="10" fill="#f0f9ff" stroke="#0284c7" stroke-width="1.7" />
+              <text x="111" y="51" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0369a1">Dữ liệu &amp; Big Data</text>
+              <text x="111" y="69" text-anchor="middle" font-size="10" fill="#334155">Nguyên liệu / Nhiên liệu</text>
+
+              <rect x="233" y="25" width="174" height="64" rx="10" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.7" />
+              <text x="320" y="51" text-anchor="middle" font-size="11.5" font-weight="700" fill="#3730a3">Trí tuệ nhân tạo (AI)</text>
+              <text x="320" y="69" text-anchor="middle" font-size="10" fill="#334155">Động cơ học &amp; suy luận</text>
+
+              <rect x="442" y="25" width="174" height="64" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.7" />
+              <text x="529" y="51" text-anchor="middle" font-size="11.5" font-weight="700" fill="#047857">Con người &amp; Bền vững</text>
+              <text x="529" y="69" text-anchor="middle" font-size="10" fill="#334155">Chính sách &amp; trách nhiệm</text>
+            </svg>`;
+        case "cia":
+        default:
+          return `
+            <svg viewBox="0 0 640 115" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="Sơ đồ bộ ba an toàn thông tin CIA">
+              <rect x="24" y="25" width="174" height="64" rx="10" fill="#ffffff" stroke="#4f46e5" stroke-width="1.7" />
+              <text x="111" y="51" text-anchor="middle" font-size="11.5" font-weight="800" fill="#3730a3">Confidentiality</text>
+              <text x="111" y="69" text-anchor="middle" font-size="10" fill="#475569">Tính bí mật thông tin</text>
+
+              <rect x="233" y="25" width="174" height="64" rx="10" fill="#ffffff" stroke="#0ea5e9" stroke-width="1.7" />
+              <text x="320" y="51" text-anchor="middle" font-size="11.5" font-weight="800" fill="#0369a1">Integrity</text>
+              <text x="320" y="69" text-anchor="middle" font-size="10" fill="#475569">Tính toàn vẹn dữ liệu</text>
+
+              <rect x="442" y="25" width="174" height="64" rx="10" fill="#ffffff" stroke="#10b981" stroke-width="1.7" />
+              <text x="529" y="51" text-anchor="middle" font-size="11.5" font-weight="800" fill="#047857">Availability</text>
+              <text x="529" y="69" text-anchor="middle" font-size="10" fill="#475569">Tính sẵn sàng dịch vụ</text>
+            </svg>`;
+      }
+    }
+
+    /**
+     * Lọc danh sách chương dựa trên chương đang chọn và từ khóa tìm kiếm.
+     */
+    function getFilteredChapters() {
+      const q = state.searchQuery.trim().toLowerCase();
+
+      return CHAPTERS_DATA.filter((ch) => {
+        const matchesChapter = state.selectedChapterId === "ALL" || Number(state.selectedChapterId) === ch.id;
+        if (!matchesChapter) return false;
+
+        if (!q) return true;
+
+        const searchableBlob = [
+          ch.code,
+          ch.title,
+          ch.badge,
+          ch.summary,
+          ...ch.highlights.map((h) => `${h.label} ${h.text}`),
+          ...(ch.table ? ch.table.rows.flat() : []),
+          ch.quiz ? ch.quiz.question : ""
+        ]
+          .join(" ")
+          .toLowerCase();
+
+        return searchableBlob.includes(q);
+      });
+    }
+
+    /**
+     * Render thanh tab lọc chương và mục lục bên trái.
+     */
+    function renderNavigationControls(filteredChapters) {
+      const tabsContainer = document.getElementById("chapterFilterTabs");
+      const tocList = document.getElementById("sidebarTocList");
+      const countEl = document.getElementById("filterResultCount");
+
+      if (countEl) {
+        if (state.searchQuery.trim()) {
+          countEl.textContent = `Tìm thấy ${filteredChapters.length} / ${CHAPTERS_DATA.length} chương khớp "${state.searchQuery.trim()}"`;
+        } else if (state.selectedChapterId === "ALL") {
+          countEl.textContent = "Hiển thị tất cả 8 chương";
+        } else {
+          countEl.textContent = `Đang xem Chương ${state.selectedChapterId}`;
+        }
+      }
+
+      if (tabsContainer) {
+        const allActive = state.selectedChapterId === "ALL";
+        let html = `
+          <button
+            type="button"
+            data-chapter-filter="ALL"
+            class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition cursor-pointer ${
+              allActive
+                ? "bg-indigo-600 text-white shadow-xs"
+                : "bg-slate-100 text-slate-700 hover:bg-slate-200/80"
+            }"
+          >
+            Tất cả (8)
+          </button>
+        `;
+
+        CHAPTERS_DATA.forEach((ch) => {
+          const active = String(state.selectedChapterId) === String(ch.id);
+          const done = Boolean(state.quizCompleted[ch.id]);
+          html += `
+            <button
+              type="button"
+              data-chapter-filter="${ch.id}"
+              class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition cursor-pointer ${
+                active
+                  ? "bg-indigo-600 text-white shadow-xs"
+                  : "bg-slate-100 text-slate-700 hover:bg-slate-200/80"
+              }"
+            >
+              <span>${ch.code}</span>
+              ${done ? `<span class="w-2 h-2 rounded-full ${active ? "bg-emerald-300" : "bg-emerald-500"}" title="Đã hoàn thành quiz"></span>` : ""}
+            </button>
+          `;
+        });
+
+        tabsContainer.innerHTML = html;
+      }
+
+      if (tocList) {
+        tocList.innerHTML = CHAPTERS_DATA.map((ch) => {
+          const active = String(state.selectedChapterId) === String(ch.id);
+          const done = Boolean(state.quizCompleted[ch.id]);
+          return `
+            <li>
+              <a
+                href="#chapter-${ch.id}"
+                data-toc-chapter="${ch.id}"
+                class="flex items-center justify-between gap-2 px-2.5 py-2 rounded-xl text-xs font-medium transition ${
+                  active
+                    ? "bg-indigo-50 text-indigo-700 font-semibold"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }"
+              >
+                <span class="truncate"><strong class="font-semibold">${ch.code}:</strong> ${ch.title}</span>
+                ${done ? `<span class="text-emerald-600 shrink-0 font-bold" title="Đã làm quiz">✓</span>` : ""}
+              </a>
+            </li>
+          `;
+        }).join("");
+      }
+    }
+
+    /**
+     * Render thẻ từng chương vào vùng nội dung chính.
+     */
+    function renderChapters() {
+      const filtered = getFilteredChapters();
+      renderNavigationControls(filtered);
+
+      const container = document.getElementById("chaptersContainer");
+      const emptyState = document.getElementById("emptySearchState");
+
+      if (!container || !emptyState) return;
+
+      if (filtered.length === 0) {
+        container.innerHTML = "";
+        emptyState.classList.remove("hidden");
+        return;
+      }
+
+      emptyState.classList.add("hidden");
+
+      container.innerHTML = filtered
+        .map((ch) => {
+          const isQuizDone = Boolean(state.quizCompleted[ch.id]);
+          const tableHtml = ch.table
+            ? `
+              <div class="overflow-x-auto rounded-xl border border-slate-200 mt-4">
+                <table class="min-w-full divide-y divide-slate-200 text-left text-xs sm:text-sm">
+                  <thead class="bg-slate-50 text-slate-700 font-semibold">
+                    <tr>
+                      ${ch.table.headers.map((h) => `<th class="px-3.5 py-2.5">${h}</th>`).join("")}
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100 bg-white text-slate-700">
+                    ${ch.table.rows
+                      .map(
+                        (row) => `
+                          <tr class="hover:bg-slate-50/70">
+                            ${row.map((cell, idx) => `<td class="px-3.5 py-2.5 ${idx === 0 ? "font-semibold text-slate-900" : ""}">${cell}</td>`).join("")}
+                          </tr>
+                        `
+                      )
+                      .join("")}
+                  </tbody>
+                </table>
+              </div>
+            `
+            : "";
+
+          const highlightsHtml = ch.highlights
+            .map(
+              (item) => `
+                <li class="p-3.5 rounded-xl bg-slate-50/90 border border-slate-200/70">
+                  <div class="text-xs sm:text-sm font-bold text-slate-900 mb-1">${item.label}</div>
+                  <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">${item.text}</p>
+                </li>
+              `
+            )
+            .join("");
+
+          const videosHtml = (ch.videos || [])
+            .map((vid) => {
+              const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(vid.query)}`;
+              return `
+                <a
+                  href="${searchUrl}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/40 transition group"
+                >
+                  <div class="flex items-center gap-3 min-w-0">
+                    <span class="w-9 h-9 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 group-hover:bg-rose-100">
+                      <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </span>
+                    <div class="min-w-0">
+                      <div class="text-xs sm:text-sm font-semibold text-slate-900 truncate group-hover:text-indigo-700">${vid.title}</div>
+                      <div class="text-[11px] text-slate-500 truncate">Tìm kiếm video bài giảng trên YouTube</div>
+                    </div>
+                  </div>
+                  <svg class="w-4 h-4 text-slate-400 group-hover:text-indigo-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              `;
+            })
+            .join("");
+
+          const refsHtml = (ch.references || [])
+            .map(
+              (ref) => `
+                <a
+                  href="${ref.url}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-indigo-700 hover:text-indigo-900 bg-indigo-50/70 hover:bg-indigo-100/80 px-3 py-2 rounded-xl border border-indigo-200/70 transition"
+                >
+                  <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 010 5.656l-3 3a4 4 0 01-5.656-5.656l1.5-1.5m5.656-1.414a4 4 0 000-5.656l-3-3a4 4 0 00-5.656 5.656l1.5 1.5" />
+                  </svg>
+                  <span>${ref.title}</span>
+                </a>
+              `
+            )
+            .join("");
+
+          const quizOptionsHtml = ch.quiz
+            ? ch.quiz.options
+                .map(
+                  (opt, optIdx) => `
+                    <button
+                      type="button"
+                      data-quiz-chapter="${ch.id}"
+                      data-quiz-option="${optIdx}"
+                      class="w-full text-left px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white hover:border-indigo-400 hover:bg-indigo-50/40 text-xs sm:text-sm text-slate-800 transition cursor-pointer flex items-start gap-2.5"
+                    >
+                      <span class="w-5 h-5 rounded-full border border-slate-300 text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5 text-slate-600">
+                        ${String.fromCharCode(65 + optIdx)}
+                      </span>
+                      <span class="leading-snug">${opt}</span>
+                    </button>
+                  `
+                )
+                .join("")
+            : "";
+
+          return `
+            <article id="chapter-${ch.id}" class="chapter-section chapter-card-enter bg-white rounded-2xl border border-slate-200 shadow-xs p-5 sm:p-6 print-break-inside-avoid">
+              <!-- Phần đầu chương -->
+              <div class="flex flex-wrap items-start justify-between gap-3 pb-4 border-b border-slate-100">
+                <div>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-indigo-600 text-white">
+                      ${ch.code}
+                    </span>
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700">
+                      ${ch.badge}
+                    </span>
+                    <span id="quizStatusBadge-${ch.id}" class="text-xs font-semibold px-2.5 py-1 rounded-lg ${
+                      isQuizDone ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-amber-50 text-amber-700 border border-amber-200"
+                    }">
+                      ${isQuizDone ? "Đã hoàn thành Quiz" : "Chưa làm Quiz"}
+                    </span>
+                  </div>
+                  <h2 class="text-lg sm:text-xl font-bold text-slate-900 mt-2">
+                    ${ch.title}
+                  </h2>
+                </div>
+
+                <!-- Nút bật/tắt nhanh câu hỏi tự kiểm tra -->
+                <button
+                  type="button"
+                  data-toggle-quiz="${ch.id}"
+                  class="no-print inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition cursor-pointer"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>Tự kiểm tra / Flashcard</span>
+                </button>
+              </div>
+
+              <!-- Tóm tắt tổng quan -->
+              <p class="text-sm text-slate-700 leading-relaxed mt-4">
+                ${ch.summary}
+              </p>
+
+              <!-- Sơ đồ trực quan minh họa khái niệm chương -->
+              <div class="mt-4">
+                ${renderDiagramSvg(ch.diagramType)}
+              </div>
+
+              <!-- Các ý trọng tâm -->
+              <div class="mt-5">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5">
+                  Điểm trọng tâm ôn tập
+                </h3>
+                <ul class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  ${highlightsHtml}
+                </ul>
+              </div>
+
+              <!-- Bảng tổng hợp / so sánh -->
+              ${tableHtml}
+
+              <!-- Khối Self-check Quiz / Flashcard tương tác (mặc định mở nhẹ hoặc bật/tắt) -->
+              <div id="quizPanel-${ch.id}" class="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-200 no-print">
+                <div class="flex items-center justify-between gap-2 mb-2">
+                  <span class="text-xs font-bold uppercase tracking-wider text-indigo-700">
+                    Câu hỏi tự kiểm tra nhanh (${ch.code})
+                  </span>
+                  <button
+                    type="button"
+                    data-reset-quiz="${ch.id}"
+                    class="text-xs font-medium text-slate-500 hover:text-slate-800 cursor-pointer"
+                  >
+                    Làm lại
+                  </button>
+                </div>
+                <p class="text-sm font-semibold text-slate-900 mb-3">${ch.quiz.question}</p>
+                <div class="space-y-2" id="quizOptions-${ch.id}">
+                  ${quizOptionsHtml}
+                </div>
+                <div id="quizFeedback-${ch.id}" class="hidden mt-3 p-3 rounded-xl text-xs sm:text-sm leading-relaxed"></div>
+              </div>
+
+              <!-- Video bài giảng gợi ý & Tài liệu tham khảo -->
+              <div class="mt-5 pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4 no-print">
+                <div>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5">
+                    Video gợi ý ôn tập (YouTube)
+                  </h3>
+                  <div class="space-y-2">
+                    ${videosHtml}
+                  </div>
+                </div>
+                <div>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5">
+                    Nguồn tham khảo &amp; Văn bản chuẩn
+                  </h3>
+                  <div class="flex flex-wrap gap-2">
+                    ${refsHtml}
+                  </div>
+                </div>
+              </div>
+            </article>
+          `;
+        })
+        .join("");
+
+      // Gắn lại sự kiện cho các nút Quiz & Toggle trong từng chương
+      bindChapterInteractiveEvents();
+    }
+
+    /**
+     * Gắn sự kiện tương tác cho các thẻ chương sau khi render.
+     */
+    function bindChapterInteractiveEvents() {
+      document.querySelectorAll("[data-toggle-quiz]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-toggle-quiz");
+          const panel = document.getElementById(`quizPanel-${id}`);
+          if (panel) {
+            panel.classList.toggle("hidden");
+          }
+        });
+      });
+
+      document.querySelectorAll("[data-quiz-option]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const chId = Number(btn.getAttribute("data-quiz-chapter"));
+          const chosenIdx = Number(btn.getAttribute("data-quiz-option"));
+          const chapter = CHAPTERS_DATA.find((c) => c.id === chId);
+          if (!chapter || !chapter.quiz) return;
+
+          const feedbackEl = document.getElementById(`quizFeedback-${chId}`);
+          const optionsWrap = document.getElementById(`quizOptions-${chId}`);
+          if (!feedbackEl || !optionsWrap) return;
+
+          const allOptionBtns = optionsWrap.querySelectorAll("[data-quiz-option]");
+          allOptionBtns.forEach((ob, idx) => {
+            ob.classList.remove("border-emerald-500", "bg-emerald-50", "border-rose-400", "bg-rose-50");
+            if (idx === chapter.quiz.answerIndex) {
+              ob.classList.add("border-emerald-500", "bg-emerald-50");
+            } else if (idx === chosenIdx) {
+              ob.classList.add("border-rose-400", "bg-rose-50");
+            }
+          });
+
+          const isCorrect = chosenIdx === chapter.quiz.answerIndex;
+          feedbackEl.classList.remove("hidden", "bg-emerald-50", "text-emerald-900", "border", "border-emerald-200", "bg-rose-50", "text-rose-900", "border-rose-200");
+
+          if (isCorrect) {
+            feedbackEl.classList.add("bg-emerald-50", "text-emerald-900", "border", "border-emerald-200");
+            feedbackEl.innerHTML = `<strong>Chính xác!</strong> ${chapter.quiz.explanation}`;
+            state.quizCompleted[chId] = true;
+            saveQuizProgressToStorage();
+            updateProgressBar();
+
+            const badge = document.getElementById(`quizStatusBadge-${chId}`);
+            if (badge) {
+              badge.textContent = "Đã hoàn thành Quiz";
+              badge.className = "text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200";
+            }
+            showToast(`Đã ghi nhận hoàn thành Quiz ${chapter.code}!`);
+          } else {
+            feedbackEl.classList.add("bg-rose-50", "text-rose-900", "border", "border-rose-200");
+            const correctLetter = String.fromCharCode(65 + chapter.quiz.answerIndex);
+            feedbackEl.innerHTML = `<strong>Chưa chính xác (Đáp án đúng: ${correctLetter}).</strong> ${chapter.quiz.explanation}`;
+          }
+        });
+      });
+
+      document.querySelectorAll("[data-reset-quiz]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const chId = Number(btn.getAttribute("data-reset-quiz"));
+          const feedbackEl = document.getElementById(`quizFeedback-${chId}`);
+          const optionsWrap = document.getElementById(`quizOptions-${chId}`);
+          if (feedbackEl) {
+            feedbackEl.classList.add("hidden");
+            feedbackEl.innerHTML = "";
+          }
+          if (optionsWrap) {
+            optionsWrap.querySelectorAll("[data-quiz-option]").forEach((ob) => {
+              ob.classList.remove("border-emerald-500", "bg-emerald-50", "border-rose-400", "bg-rose-50");
+            });
+          }
+        });
+      });
+    }
+
+    /**
+     * Xuất toàn bộ ghi chú ôn tập (kèm hồ sơ sinh viên) ra tệp Markdown (.md).
+     */
+    function exportNotesAsMarkdown() {
+      const lines = [
+        `# TÓM TẮT ÔN TẬP CNTT & KỶ NGUYÊN SỐ (8 CHƯƠNG)`,
+        ``,
+        `- **Họ và tên sinh viên:** ${state.profile.name || "Chưa cập nhật"}`,
+        `- **MSSV:** ${state.profile.studentId || "Chưa cập nhật"}`,
+        `- **Môn:** ${state.profile.course || "Nhập môn CNTT & Chuyển đổi số"}`,
+        ``
+      ];
+
+      CHAPTERS_DATA.forEach((ch) => {
+        lines.push(`## ${ch.code}: ${ch.title}`);
+        lines.push(``);
+        lines.push(ch.summary);
+        lines.push(``);
+        ch.highlights.forEach((h) => {
+          lines.push(`- **${h.label}:** ${h.text}`);
+        });
+        lines.push(``);
+      });
+
+      const blob = new Blob([lines.join("\n")], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "tom-tat-8-chuong-cntt-ky-nguyen-so.md";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("Đã tải tệp ghi chú Markdown (.md).");
+    }
+
+    /**
+     * Khởi tạo toàn bộ sự kiện giao diện khi trang tải xong.
+     */
+    function initApp() {
+      loadPersistedState();
+      renderProfileView();
+      renderChapters();
+
+      // Sự kiện chỉnh sửa / lưu hồ sơ sinh viên
+      const toggleEditBtn = document.getElementById("toggleProfileEditBtn");
+      const profileDisplayView = document.getElementById("profileDisplayView");
+      const profileEditForm = document.getElementById("profileEditForm");
+      const cancelProfileBtn = document.getElementById("cancelProfileBtn");
+      const toggleEditText = document.getElementById("toggleProfileEditText");
+
+      function setProfileEditing(editing) {
+        if (!profileDisplayView || !profileEditForm || !toggleEditText) return;
+        if (editing) {
+          profileDisplayView.classList.add("hidden");
+          profileEditForm.classList.remove("hidden");
+          profileEditForm.classList.add("grid");
+          toggleEditText.textContent = "Đang chỉnh sửa";
+          document.getElementById("inputStudentName")?.focus();
+        } else {
+          profileEditForm.classList.add("hidden");
+          profileEditForm.classList.remove("grid");
+          profileDisplayView.classList.remove("hidden");
+          toggleEditText.textContent = "Chỉnh sửa hồ sơ";
+        }
+      }
+
+      toggleEditBtn?.addEventListener("click", () => {
+        const isCurrentlyHidden = profileEditForm?.classList.contains("hidden");
+        setProfileEditing(Boolean(isCurrentlyHidden));
+      });
+
+      cancelProfileBtn?.addEventListener("click", () => {
+        renderProfileView();
+        setProfileEditing(false);
+      });
+
+      profileEditForm?.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const nameVal = document.getElementById("inputStudentName")?.value || "";
+        const idVal = document.getElementById("inputStudentId")?.value || "";
+        const courseVal = document.getElementById("inputCourseName")?.value || "";
+
+        state.profile = {
+          name: nameVal.trim(),
+          studentId: idVal.trim(),
+          course: courseVal.trim() || "Nhập môn Công nghệ thông tin & Chuyển đổi số"
+        };
+
+        saveProfileToStorage();
+        renderProfileView();
+        setProfileEditing(false);
+        showToast("Đã lưu hồ sơ sinh viên vào trình duyệt.");
+      });
+
+      // Sự kiện lọc chương theo tab ngang
+      document.getElementById("chapterFilterTabs")?.addEventListener("click", (e) => {
+        const target = e.target.closest("[data-chapter-filter]");
+        if (!target) return;
+        state.selectedChapterId = target.getAttribute("data-chapter-filter");
+        renderChapters();
+      });
+
+      // Sự kiện chọn mục lục bên trái
+      document.getElementById("sidebarTocList")?.addEventListener("click", (e) => {
+        const link = e.target.closest("[data-toc-chapter]");
+        if (!link) return;
+        const chId = link.getAttribute("data-toc-chapter");
+        if (state.selectedChapterId !== "ALL" && String(state.selectedChapterId) !== String(chId)) {
+          state.selectedChapterId = "ALL";
+          renderChapters();
+        }
+      });
+
+      // Sự kiện tìm kiếm nhanh
+      const searchInput = document.getElementById("searchInput");
+      const clearSearchBtn = document.getElementById("clearSearchBtn");
+      const resetFilterBtn = document.getElementById("resetFilterBtn");
+
+      searchInput?.addEventListener("input", (e) => {
+        state.searchQuery = e.target.value || "";
+        clearSearchBtn?.classList.toggle("hidden", !state.searchQuery.trim());
+        renderChapters();
+      });
+
+      clearSearchBtn?.addEventListener("click", () => {
+        if (searchInput) searchInput.value = "";
+        state.searchQuery = "";
+        clearSearchBtn.classList.add("hidden");
+        renderChapters();
+      });
+
+      resetFilterBtn?.addEventListener("click", () => {
+        if (searchInput) searchInput.value = "";
+        state.searchQuery = "";
+        state.selectedChapterId = "ALL";
+        clearSearchBtn?.classList.add("hidden");
+        renderChapters();
+      });
+
+      // Nút xuất .MD và In / PDF
+      document.getElementById("exportMdBtn")?.addEventListener("click", exportNotesAsMarkdown);
+      document.getElementById("printBtn")?.addEventListener("click", () => {
+        window.print();
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", initApp);
+  </script>
+</body>
+</html>
