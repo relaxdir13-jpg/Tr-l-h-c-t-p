@@ -149,6 +149,17 @@
 
         <div class="flex items-center gap-2 self-start sm:self-center no-print">
           <button
+            id="resetProfileDefaultBtn"
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-medium rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition cursor-pointer"
+            title="Khôi phục hồ sơ mặc định (Lê Nguyễn Đắc Long - PK04870)"
+          >
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>Reset mặc định</span>
+          </button>
+          <button
             id="toggleProfileEditBtn"
             type="button"
             class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition cursor-pointer"
@@ -165,15 +176,15 @@
       <div id="profileDisplayView" class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
         <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
           <div class="text-xs font-medium text-slate-500">Họ và tên sinh viên:</div>
-          <div id="displayStudentName" class="text-base font-semibold text-slate-900 mt-1">Chưa cập nhật họ tên</div>
+          <div id="displayStudentName" class="text-base font-semibold text-slate-900 mt-1">Lê Nguyễn Đắc Long</div>
         </div>
         <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
           <div class="text-xs font-medium text-slate-500">MSSV:</div>
-          <div id="displayStudentId" class="text-base font-semibold text-slate-900 mt-1">Chưa cập nhật MSSV</div>
+          <div id="displayStudentId" class="text-base font-semibold text-slate-900 mt-1">PK04870</div>
         </div>
         <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
           <div class="text-xs font-medium text-slate-500">Môn:</div>
-          <div id="displayCourseName" class="text-base font-semibold text-slate-900 mt-1">Nhập môn CNTT &amp; Chuyển đổi số</div>
+          <div id="displayCourseName" class="text-base font-semibold text-slate-900 mt-1">AI_Công nghệ thông tin 4.0</div>
         </div>
       </div>
 
@@ -293,6 +304,35 @@
       </button>
     </div>
   </main>
+
+  <!-- Modal xem phóng to hình ảnh / sơ đồ minh họa từng bài học -->
+  <div id="diagramModal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4 no-print" role="dialog" aria-modal="true" aria-labelledby="diagramModalTitle">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-4xl w-full overflow-hidden">
+      <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-slate-100">
+        <div>
+          <span id="diagramModalBadge" class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-md">
+            Hình minh họa
+          </span>
+          <h3 id="diagramModalTitle" class="text-base sm:text-lg font-bold text-slate-900 mt-1">
+            Chi tiết sơ đồ minh họa
+          </h3>
+        </div>
+        <button
+          id="closeDiagramModalBtn"
+          type="button"
+          class="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer"
+          aria-label="Đóng cửa sổ xem phóng to"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div id="diagramModalCanvas" class="p-4 sm:p-6 bg-slate-50 max-h-[75vh] overflow-auto">
+        <!-- SVG phóng to được chèn tại đây -->
+      </div>
+    </div>
+  </div>
 
   <!-- Chân trang -->
   <footer class="bg-white border-t border-slate-200 mt-12 py-6 no-print">
@@ -823,19 +863,22 @@
 
     // Khóa lưu trữ localStorage
     const STORAGE_KEYS = {
-      PROFILE: "vn_it_study_hub_profile_v1",
+      PROFILE: "vn_it_study_hub_profile_v2",
       QUIZ_DONE: "vn_it_study_hub_quiz_done_v1"
+    };
+
+    const DEFAULT_PROFILE = {
+      name: "Lê Nguyễn Đắc Long",
+      studentId: "PK04870",
+      course: "AI_Công nghệ thông tin 4.0"
     };
 
     // Trạng thái ứng dụng
     const state = {
       selectedChapterId: "ALL",
       searchQuery: "",
-      profile: {
-        name: "",
-        studentId: "",
-        course: "Nhập môn Công nghệ thông tin & Chuyển đổi số"
-      },
+      hiddenDiagrams: {}, // { [chapterId]: boolean }
+      profile: { ...DEFAULT_PROFILE },
       quizCompleted: {} // { [chapterId]: boolean }
     };
 
@@ -863,13 +906,17 @@
         if (rawProfile) {
           const parsed = JSON.parse(rawProfile);
           state.profile = {
-            name: typeof parsed.name === "string" ? parsed.name : "",
-            studentId: typeof parsed.studentId === "string" ? parsed.studentId : "",
-            course: typeof parsed.course === "string" && parsed.course.trim()
-              ? parsed.course
-              : "Nhập môn Công nghệ thông tin & Chuyển đổi số"
+            name: typeof parsed.name === "string" && parsed.name.trim() ? parsed.name.trim() : DEFAULT_PROFILE.name,
+            studentId: typeof parsed.studentId === "string" && parsed.studentId.trim() ? parsed.studentId.trim() : DEFAULT_PROFILE.studentId,
+            course: typeof parsed.course === "string" && parsed.course.trim() ? parsed.course.trim() : DEFAULT_PROFILE.course
           };
+        } else {
+          state.profile = { ...DEFAULT_PROFILE };
         }
+      } catch (err) {
+        console.warn("Không thể đọc hồ sơ từ localStorage:", err);
+        state.profile = { ...DEFAULT_PROFILE };
+      }
       } catch (err) {
         console.warn("Không thể đọc hồ sơ từ localStorage:", err);
       }
@@ -950,11 +997,12 @@
     /**
      * Sinh sơ đồ SVG trực quan đặc trưng cho từng chương.
      */
-    function renderDiagramSvg(type) {
+    function renderDiagramSvg(type, chapterTitle = "") {
+      const ariaTitle = chapterTitle ? `Sơ đồ minh họa ${chapterTitle}` : "Sơ đồ minh họa bài học";
       switch (type) {
         case "ir4":
           return `
-            <svg viewBox="0 0 640 135" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="Sơ đồ tiến trình 4 cuộc cách mạng công nghiệp">
+            <svg viewBox="0 0 640 135" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="${ariaTitle}">
               <line x1="65" y1="54" x2="575" y2="54" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="5 4" />
               <g transform="translate(20,22)">
                 <rect width="128" height="64" rx="10" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5" />
@@ -983,12 +1031,12 @@
             </svg>`;
         case "ipo":
           return `
-            <svg viewBox="0 0 640 125" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="Sơ đồ mô hình xử lý máy tính Input Process Output Storage">
+            <svg viewBox="0 0 640 125" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="${ariaTitle}">
               <rect x="20" y="28" width="130" height="64" rx="10" fill="#ffffff" stroke="#0ea5e9" stroke-width="1.8" />
               <text x="85" y="53" text-anchor="middle" font-size="12" font-weight="700" fill="#0369a1">1. INPUT</text>
               <text x="85" y="72" text-anchor="middle" font-size="10.5" fill="#475569">Nhập &amp; Cảm biến</text>
 
-              <path d="M155 60 L182 60" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)" />
+              <path d="M155 60 L182 60" stroke="#64748b" stroke-width="2" />
               <rect x="186" y="28" width="144" height="64" rx="10" fill="#eef2ff" stroke="#4f46e5" stroke-width="2" />
               <text x="258" y="53" text-anchor="middle" font-size="12" font-weight="800" fill="#3730a3">2. PROCESS</text>
               <text x="258" y="72" text-anchor="middle" font-size="10.5" fill="#312e81">CPU (GHz, Cores) &amp; RAM</text>
@@ -1005,7 +1053,7 @@
             </svg>`;
         case "vmContainer":
           return `
-            <svg viewBox="0 0 640 130" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="Sơ đồ so sánh Máy ảo VM và Container">
+            <svg viewBox="0 0 640 130" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="${ariaTitle}">
               <rect x="20" y="14" width="290" height="102" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" />
               <text x="165" y="34" text-anchor="middle" font-size="12" font-weight="700" fill="#1e293b">Máy ảo (VM) – Hypervisor</text>
               <rect x="34" y="44" width="82" height="36" rx="6" fill="#e0e7ff" stroke="#6366f1" />
@@ -1030,7 +1078,7 @@
             </svg>`;
         case "cloud":
           return `
-            <svg viewBox="0 0 640 120" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="Sơ đồ mô hình dịch vụ đám mây IaaS PaaS SaaS">
+            <svg viewBox="0 0 640 120" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="${ariaTitle}">
               <rect x="24" y="22" width="180" height="76" rx="10" fill="#ffffff" stroke="#3b82f6" stroke-width="1.8" />
               <text x="114" y="48" text-anchor="middle" font-size="12" font-weight="800" fill="#1d4ed8">IaaS</text>
               <text x="114" y="67" text-anchor="middle" font-size="10.5" fill="#334155">Hạ tầng máy chủ, mạng,</text>
@@ -1048,7 +1096,7 @@
             </svg>`;
         case "osi":
           return `
-            <svg viewBox="0 0 640 115" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="Sơ đồ luồng đóng gói dữ liệu qua các tầng mạng">
+            <svg viewBox="0 0 640 115" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="${ariaTitle}">
               <rect x="20" y="26" width="136" height="62" rx="10" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6" />
               <text x="88" y="51" text-anchor="middle" font-size="11" font-weight="700" fill="#3730a3">Tầng 7–5</text>
               <text x="88" y="69" text-anchor="middle" font-size="10.5" fill="#334155">Data / Message</text>
@@ -1067,7 +1115,7 @@
             </svg>`;
         case "ct":
           return `
-            <svg viewBox="0 0 640 115" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="Sơ đồ 4 bước Tư duy lập trình Computational Thinking">
+            <svg viewBox="0 0 640 115" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="${ariaTitle}">
               <rect x="18" y="25" width="138" height="64" rx="10" fill="#ffffff" stroke="#6366f1" stroke-width="1.6" />
               <text x="87" y="51" text-anchor="middle" font-size="11" font-weight="700" fill="#312e81">1. Phân rã</text>
               <text x="87" y="69" text-anchor="middle" font-size="10" fill="#475569">Chia nhỏ bài toán</text>
@@ -1086,7 +1134,7 @@
             </svg>`;
         case "aiData":
           return `
-            <svg viewBox="0 0 640 115" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="Sơ đồ mối liên hệ Dữ liệu, AI và Phát triển bền vững">
+            <svg viewBox="0 0 640 115" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="${ariaTitle}">
               <rect x="24" y="25" width="174" height="64" rx="10" fill="#f0f9ff" stroke="#0284c7" stroke-width="1.7" />
               <text x="111" y="51" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0369a1">Dữ liệu &amp; Big Data</text>
               <text x="111" y="69" text-anchor="middle" font-size="10" fill="#334155">Nguyên liệu / Nhiên liệu</text>
@@ -1102,7 +1150,7 @@
         case "cia":
         default:
           return `
-            <svg viewBox="0 0 640 115" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="Sơ đồ bộ ba an toàn thông tin CIA">
+            <svg viewBox="0 0 640 115" class="w-full h-auto rounded-xl bg-slate-50 border border-slate-200/80 p-2" role="img" aria-label="${ariaTitle}">
               <rect x="24" y="25" width="174" height="64" rx="10" fill="#ffffff" stroke="#4f46e5" stroke-width="1.7" />
               <text x="111" y="51" text-anchor="middle" font-size="11.5" font-weight="800" fill="#3730a3">Confidentiality</text>
               <text x="111" y="69" text-anchor="middle" font-size="10" fill="#475569">Tính bí mật thông tin</text>
@@ -1395,60 +1443,32 @@
 
               <!-- Sơ đồ trực quan minh họa khái niệm chương -->
               <div class="mt-4">
-                ${renderDiagramSvg(ch.diagramType)}
-              </div>
-
-              <!-- Các ý trọng tâm -->
-              <div class="mt-5">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5">
-                  Điểm trọng tâm ôn tập
-                </h3>
-                <ul class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  ${highlightsHtml}
-                </ul>
-              </div>
-
-              <!-- Bảng tổng hợp / so sánh -->
-              ${tableHtml}
-
-              <!-- Khối Self-check Quiz / Flashcard tương tác (mặc định mở nhẹ hoặc bật/tắt) -->
-              <div id="quizPanel-${ch.id}" class="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-200 no-print">
-                <div class="flex items-center justify-between gap-2 mb-2">
-                  <span class="text-xs font-bold uppercase tracking-wider text-indigo-700">
-                    Câu hỏi tự kiểm tra nhanh (${ch.code})
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <span class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Hình minh họa trực quan (${ch.code})
                   </span>
-                  <button
-                    type="button"
-                    data-reset-quiz="${ch.id}"
-                    class="text-xs font-medium text-slate-500 hover:text-slate-800 cursor-pointer"
-                  >
-                    Làm lại
-                  </button>
-                </div>
-                <p class="text-sm font-semibold text-slate-900 mb-3">${ch.quiz.question}</p>
-                <div class="space-y-2" id="quizOptions-${ch.id}">
-                  ${quizOptionsHtml}
-                </div>
-                <div id="quizFeedback-${ch.id}" class="hidden mt-3 p-3 rounded-xl text-xs sm:text-sm leading-relaxed"></div>
-              </div>
-
-              <!-- Video bài giảng gợi ý & Tài liệu tham khảo -->
-              <div class="mt-5 pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4 no-print">
-                <div>
-                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5">
-                    Video gợi ý ôn tập (YouTube)
-                  </h3>
-                  <div class="space-y-2">
-                    ${videosHtml}
+                  <div class="flex items-center gap-2 no-print">
+                    <button
+                      type="button"
+                      data-toggle-diagram="${ch.id}"
+                      class="px-2.5 py-1 text-xs font-medium rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+                    >
+                      ${state.hiddenDiagrams[ch.id] ? "Hiện sơ đồ" : "Ẩn sơ đồ"}
+                    </button>
+                    <button
+                      type="button"
+                      data-zoom-diagram="${ch.id}"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition cursor-pointer"
+                    >
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15zM10 7v6m3-3H7" />
+                      </svg>
+                      <span>Phóng to</span>
+                    </button>
                   </div>
                 </div>
-                <div>
-                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5">
-                    Nguồn tham khảo &amp; Văn bản chuẩn
-                  </h3>
-                  <div class="flex flex-wrap gap-2">
-                    ${refsHtml}
-                  </div>
+                <div id="diagramWrapper-${ch.id}" class="${state.hiddenDiagrams[ch.id] ? "hidden" : ""}">
+                  ${renderDiagramSvg(ch.diagramType, `${ch.code} - ${ch.title}`)}
                 </div>
               </div>
             </article>
@@ -1464,6 +1484,27 @@
      * Gắn sự kiện tương tác cho các thẻ chương sau khi render.
      */
     function bindChapterInteractiveEvents() {
+      document.querySelectorAll("[data-toggle-diagram]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const chId = Number(btn.getAttribute("data-toggle-diagram"));
+          state.hiddenDiagrams[chId] = !state.hiddenDiagrams[chId];
+          const wrapper = document.getElementById(`diagramWrapper-${chId}`);
+          if (wrapper) {
+            wrapper.classList.toggle("hidden", Boolean(state.hiddenDiagrams[chId]));
+          }
+          btn.textContent = state.hiddenDiagrams[chId] ? "Hiện sơ đồ" : "Ẩn sơ đồ";
+        });
+      });
+
+      document.querySelectorAll("[data-zoom-diagram]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const chId = Number(btn.getAttribute("data-zoom-diagram"));
+          const chapter = CHAPTERS_DATA.find((c) => c.id === chId);
+          if (!chapter) return;
+          openDiagramModal(chapter);
+        });
+      });
+
       document.querySelectorAll("[data-toggle-quiz]").forEach((btn) => {
         btn.addEventListener("click", () => {
           const id = btn.getAttribute("data-toggle-quiz");
@@ -1532,45 +1573,24 @@
             optionsWrap.querySelectorAll("[data-quiz-option]").forEach((ob) => {
               ob.classList.remove("border-emerald-500", "bg-emerald-50", "border-rose-400", "bg-rose-50");
             });
-          }
-        });
-      });
+    function openDiagramModal(chapter) {
+      const modal = document.getElementById("diagramModal");
+      const badge = document.getElementById("diagramModalBadge");
+      const title = document.getElementById("diagramModalTitle");
+      const canvas = document.getElementById("diagramModalCanvas");
+      if (!modal || !badge || !title || !canvas) return;
+
+      badge.textContent = `${chapter.code} • ${chapter.badge}`;
+      title.textContent = `Hình minh họa: ${chapter.title}`;
+      canvas.innerHTML = renderDiagramSvg(chapter.diagramType, `${chapter.code} - ${chapter.title}`);
+      modal.classList.remove("hidden");
     }
 
-    /**
-     * Xuất toàn bộ ghi chú ôn tập (kèm hồ sơ sinh viên) ra tệp Markdown (.md).
-     */
-    function exportNotesAsMarkdown() {
-      const lines = [
-        `# TÓM TẮT ÔN TẬP CNTT & KỶ NGUYÊN SỐ (8 CHƯƠNG)`,
-        ``,
-        `- **Họ và tên sinh viên:** ${state.profile.name || "Chưa cập nhật"}`,
-        `- **MSSV:** ${state.profile.studentId || "Chưa cập nhật"}`,
-        `- **Môn:** ${state.profile.course || "Nhập môn CNTT & Chuyển đổi số"}`,
-        ``
-      ];
-
-      CHAPTERS_DATA.forEach((ch) => {
-        lines.push(`## ${ch.code}: ${ch.title}`);
-        lines.push(``);
-        lines.push(ch.summary);
-        lines.push(``);
-        ch.highlights.forEach((h) => {
-          lines.push(`- **${h.label}:** ${h.text}`);
-        });
-        lines.push(``);
-      });
-
-      const blob = new Blob([lines.join("\n")], { type: "text/markdown;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "tom-tat-8-chuong-cntt-ky-nguyen-so.md";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast("Đã tải tệp ghi chú Markdown (.md).");
+    function closeDiagramModal() {
+      const modal = document.getElementById("diagramModal");
+      if (modal) {
+        modal.classList.add("hidden");
+      }
     }
 
     /**
@@ -1580,6 +1600,27 @@
       loadPersistedState();
       renderProfileView();
       renderChapters();
+
+      // Sự kiện nút Reset hồ sơ mặc định
+      document.getElementById("resetProfileDefaultBtn")?.addEventListener("click", () => {
+        state.profile = { ...DEFAULT_PROFILE };
+        saveProfileToStorage();
+        renderProfileView();
+        showToast("Đã khôi phục hồ sơ mặc định: Lê Nguyễn Đắc Long (PK04870).");
+      });
+
+      // Sự kiện modal phóng to hình minh họa
+      document.getElementById("closeDiagramModalBtn")?.addEventListener("click", closeDiagramModal);
+      document.getElementById("diagramModal")?.addEventListener("click", (e) => {
+        if (e.target && e.target.id === "diagramModal") {
+          closeDiagramModal();
+        }
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          closeDiagramModal();
+        }
+      });
 
       // Sự kiện chỉnh sửa / lưu hồ sơ sinh viên
       const toggleEditBtn = document.getElementById("toggleProfileEditBtn");
