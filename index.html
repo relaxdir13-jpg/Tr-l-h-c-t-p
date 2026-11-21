@@ -1,0 +1,2510 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thư viện Học tập Cá nhân - Nhập môn CNTT & Kỷ nguyên Số 4.0</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        notion: {
+                            bg: '#FFFFFF',
+                            sidebar: '#F7F7F5',
+                            hover: '#EFEFED',
+                            border: '#E9E9E7',
+                            text: '#37352F',
+                            muted: '#787774',
+                        },
+                        coursera: {
+                            blue: '#0056D2',
+                            dark: '#00419E',
+                            light: '#F0F6FF',
+                            accent: '#1F6FEB'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            color: #37352F;
+            background-color: #FFFFFF;
+        }
+        /* Thanh cuộn tinh tế phong cách Notion */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D3D1CB;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #AEACA6;
+        }
+
+        /* Hiệu ứng lật thẻ 3D cho Flashcards */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        /* Chuyển tab mượt mà */
+        .nav-item-active {
+            background-color: #EFEFED;
+            color: #0056D2;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden">
+
+    <!-- Container Thông báo Toast (Không dùng alert) -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Header Mobile -->
+    <header class="lg:hidden sticky top-0 z-30 bg-white/95 backdrop-blur-xs border-b border-notion-border px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+            <button onclick="toggleLeftSidebar()" class="p-2 rounded-lg hover:bg-notion-hover text-notion-text" aria-label="Mở danh mục">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-coursera-blue text-white flex items-center justify-center font-bold text-xs shadow-2xs">4.0</span>
+                <span class="font-bold text-sm tracking-tight text-notion-text truncate max-w-[190px]">Nhập môn CNTT & Số 4.0</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-1.5">
+            <button onclick="switchMainView('flashcards')" class="p-2 rounded-lg hover:bg-notion-hover text-coursera-blue" title="Flashcards">
+                <i data-lucide="layers" class="w-5 h-5"></i>
+            </button>
+            <button onclick="switchMainView('quiz')" class="p-2 rounded-lg hover:bg-notion-hover text-emerald-600" title="Trắc nghiệm 10 câu">
+                <i data-lucide="check-square" class="w-5 h-5"></i>
+            </button>
+            <button onclick="toggleRightSidebar()" class="p-2 rounded-lg hover:bg-notion-hover text-notion-text" title="Bảng ghi chú & Tiến độ">
+                <i data-lucide="panel-right" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Overlay Mobile -->
+    <div id="mobile-overlay" onclick="closeAllSidebars()" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden backdrop-blur-[1px]"></div>
+
+    <!-- WORKSPACE 3 CỘT: LEFT SIDEBAR - CENTER CONTENT - RIGHT STUDY PANEL -->
+    <div class="min-h-screen flex flex-col lg:flex-row">
+
+        <!-- ==================== 1. THANH ĐIỀU HƯỚNG TRÁI (NOTION SIDEBAR) ==================== -->
+        <aside id="left-sidebar" class="fixed lg:sticky top-0 left-0 z-40 h-screen w-72 bg-notion-sidebar border-r border-notion-border flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0 shrink-0 select-none">
+            <!-- Workspace Header -->
+            <div class="p-4 border-b border-notion-border flex items-center justify-between">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-8 h-8 rounded-lg bg-coursera-blue text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs">
+                        IT
+                    </div>
+                    <div class="min-w-0">
+                        <h1 class="font-bold text-sm text-notion-text truncate">CNTT & Kỷ nguyên Số 4.0</h1>
+                        <p class="text-[11px] text-notion-muted truncate">Personal Learning Workspace</p>
+                    </div>
+                </div>
+                <button onclick="toggleLeftSidebar()" class="lg:hidden p-1.5 rounded-lg hover:bg-notion-hover text-notion-muted">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Tìm kiếm nhanh toàn cục -->
+            <div class="p-3">
+                <div class="relative">
+                    <i data-lucide="search" class="w-3.5 h-3.5 text-notion-muted absolute left-3 top-1/2 -translate-y-1/2"></i>
+                    <input type="text" id="global-search" oninput="handleGlobalSearch(this.value)" placeholder="Tìm chuyên đề, thuật ngữ, ghi chú..." class="w-full pl-8 pr-3 py-1.5 bg-white border border-notion-border rounded-lg text-xs text-notion-text placeholder:text-notion-muted focus:outline-none focus:border-coursera-blue focus:ring-2 focus:ring-blue-100 transition">
+                </div>
+            </div>
+
+            <!-- Danh mục 8 Chuyên đề & Công cụ ôn tập -->
+            <div class="flex-1 overflow-y-auto px-2.5 pb-4 space-y-5">
+                <!-- Nhóm Chế độ học tập -->
+                <div>
+                    <div class="px-2 mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-notion-muted">
+                        Không gian Ôn luyện
+                    </div>
+                    <div class="space-y-0.5">
+                        <button onclick="switchMainView('overview')" id="nav-overview" class="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium text-notion-text hover:bg-notion-hover transition">
+                            <span class="flex items-center gap-2.5">
+                                <i data-lucide="layout-grid" class="w-4 h-4 text-coursera-blue"></i>
+                                Tổng quan Khóa học
+                            </span>
+                            <span id="sidebar-mastery-badge" class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-blue-100 text-coursera-blue">0/8</span>
+                        </button>
+                        <button onclick="switchMainView('flashcards')" id="nav-flashcards" class="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium text-notion-text hover:bg-notion-hover transition">
+                            <span class="flex items-center gap-2.5">
+                                <i data-lucide="layers" class="w-4 h-4 text-amber-600"></i>
+                                Thẻ ghi nhớ (Flashcards)
+                            </span>
+                            <span id="sidebar-fc-badge" class="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">24 thẻ</span>
+                        </button>
+                        <button onclick="switchMainView('quiz')" id="nav-quiz" class="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium text-notion-text hover:bg-notion-hover transition">
+                            <span class="flex items-center gap-2.5">
+                                <i data-lucide="award" class="w-4 h-4 text-emerald-600"></i>
+                                Trắc nghiệm nhanh (10 câu)
+                            </span>
+                            <span id="sidebar-quiz-badge" class="text-[10px] font-medium px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">Mới</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Nhóm 8 Chuyên đề học tập -->
+                <div>
+                    <div class="px-2 mb-1.5 flex items-center justify-between">
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-notion-muted">8 Chuyên đề cốt lõi</span>
+                        <span class="text-[10px] text-notion-muted">4.0</span>
+                    </div>
+                    <nav id="topics-nav-list" class="space-y-0.5">
+                        <!-- Render tự động 8 chuyên đề bằng JS -->
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Chân Sidebar: Sao lưu & Khôi phục -->
+            <div class="p-3 border-t border-notion-border bg-notion-sidebar space-y-1.5">
+                <div class="grid grid-cols-2 gap-1.5">
+                    <button onclick="exportWorkspaceJSON()" class="flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-white border border-notion-border hover:bg-notion-hover rounded-lg text-[11px] font-medium text-notion-text transition">
+                        <i data-lucide="download" class="w-3.5 h-3.5 text-coursera-blue"></i> Xuất JSON
+                    </button>
+                    <button onclick="exportNotesMarkdown()" class="flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-white border border-notion-border hover:bg-notion-hover rounded-lg text-[11px] font-medium text-notion-text transition">
+                        <i data-lucide="file-text" class="w-3.5 h-3.5 text-emerald-600"></i> Xuất .MD
+                    </button>
+                </div>
+                <label class="w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-white border border-notion-border hover:bg-notion-hover rounded-lg text-[11px] font-medium text-notion-muted hover:text-notion-text cursor-pointer transition">
+                    <i data-lucide="upload" class="w-3.5 h-3.5"></i> Nhập bản sao lưu JSON
+                    <input type="file" accept=".json" onchange="importWorkspaceJSON(event)" class="hidden">
+                </label>
+            </div>
+        </aside>
+
+        <!-- ==================== 2. KHU VỰC NỘI DUNG TRUNG TÂM ==================== -->
+        <main class="flex-1 min-w-0 bg-white">
+            <!-- Thanh Breadcrumb & Trạng thái học tập trên cùng -->
+            <div class="sticky top-0 lg:top-0 z-20 bg-white/95 backdrop-blur-xs border-b border-notion-border px-4 sm:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2 text-xs text-notion-muted min-w-0">
+                    <button onclick="switchMainView('overview')" class="hover:text-notion-text transition font-medium">Thư viện 4.0</button>
+                    <i data-lucide="chevron-right" class="w-3.5 h-3.5 shrink-0"></i>
+                    <span id="breadcrumb-current" class="text-notion-text font-semibold truncate">Tổng quan Khóa học</span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <!-- Bộ chọn trạng thái chuyên đề khi đang xem bài học -->
+                    <div id="topic-status-control" class="hidden items-center gap-1.5">
+                        <span class="text-[11px] text-notion-muted hidden sm:inline">Trạng thái:</span>
+                        <select id="status-select" onchange="updateCurrentTopicStatus(this.value)" class="text-xs font-medium px-2.5 py-1 rounded-lg border border-notion-border bg-notion-sidebar text-notion-text focus:outline-none focus:border-coursera-blue cursor-pointer">
+                            <option value="not_started">⚪ Chưa học</option>
+                            <option value="in_progress">🟡 Đang ôn</option>
+                            <option value="mastered">🟢 Đã nắm vững</option>
+                        </select>
+                    </div>
+                    <button onclick="toggleRightSidebar()" class="hidden lg:inline-flex xl:hidden items-center gap-1.5 px-2.5 py-1 rounded-lg border border-notion-border text-xs font-medium hover:bg-notion-hover">
+                        <i data-lucide="notebook-pen" class="w-3.5 h-3.5 text-coursera-blue"></i> Ghi chú
+                    </button>
+                </div>
+            </div>
+
+            <!-- Khung Nội dung Động (Overview / Topic Detail / Flashcards / Quiz) -->
+            <div class="max-w-4xl mx-auto px-4 sm:px-8 py-8">
+
+                <!-- VIEW A: TỔNG QUAN KHÓA HỌC -->
+                <section id="view-overview" class="space-y-8">
+                    <!-- Hero Banner phong cách Coursera -->
+                    <div class="rounded-2xl bg-gradient-to-br from-coursera-light via-white to-slate-50 border border-blue-100 p-6 sm:p-8 shadow-2xs">
+                        <div class="flex flex-wrap items-center gap-2 mb-3">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-coursera-blue text-white">Học phần Nền tảng</span>
+                            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-white border border-blue-200 text-coursera-blue">8 Chuyên đề • SVG • Video • Flashcards • Quiz</span>
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-notion-text tracking-tight leading-tight">
+                            Nhập môn Công nghệ Thông tin & Kỷ nguyên Số 4.0
+                        </h2>
+                        <p class="text-sm sm:text-base text-notion-muted mt-2.5 leading-relaxed max-w-2xl">
+                            Không gian học tập cá nhân hóa giúp bạn hệ thống hóa kiến thức từ kiến trúc phần cứng, mạng Internet, dữ liệu lớn đến Trí tuệ nhân tạo, an ninh mạng và đạo đức công dân số.
+                        </p>
+
+                        <!-- Thanh tiến độ tổng thể -->
+                        <div class="mt-6 pt-5 border-t border-blue-100/80 grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                            <div class="sm:col-span-2">
+                                <div class="flex justify-between text-xs font-semibold mb-1.5">
+                                    <span class="text-notion-text">Tiến độ hoàn thành 8 chuyên đề</span>
+                                    <span id="overview-progress-text" class="text-coursera-blue">0% (0/8 chuyên đề nắm vững)</span>
+                                </div>
+                                <div class="w-full h-2.5 bg-blue-100 rounded-full overflow-hidden">
+                                    <div id="overview-progress-bar" class="h-full bg-coursera-blue rounded-full transition-all duration-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="flex gap-2 sm:justify-end">
+                                <button onclick="openTopic(1)" class="px-4 py-2 bg-coursera-blue hover:bg-coursera-dark text-white text-xs font-semibold rounded-xl shadow-2xs transition flex items-center gap-1.5">
+                                    <i data-lucide="play" class="w-3.5 h-3.5"></i> Bắt đầu học
+                                </button>
+                                <button onclick="switchMainView('quiz')" class="px-3.5 py-2 bg-white hover:bg-notion-hover border border-notion-border text-notion-text text-xs font-semibold rounded-xl transition">
+                                    Làm Quiz
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kết quả tìm kiếm toàn cục (nếu có nhập từ khóa) -->
+                    <div id="global-search-results" class="hidden space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-bold text-notion-text flex items-center gap-2">
+                                <i data-lucide="search" class="w-4 h-4 text-coursera-blue"></i>
+                                Kết quả tìm kiếm trong bài học & ghi chú cá nhân
+                            </h3>
+                            <button onclick="clearGlobalSearch()" class="text-xs text-coursera-blue hover:underline">Xóa tìm kiếm</button>
+                        </div>
+                        <div id="global-search-list" class="space-y-2.5"></div>
+                    </div>
+
+                    <!-- Lưới 8 Chuyên đề -->
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-base font-bold text-notion-text">Lộ trình 8 Chuyên đề Học tập</h3>
+                            <span class="text-xs text-notion-muted">Nhấp vào từng chuyên đề để học & ghi chú</span>
+                        </div>
+                        <div id="overview-topics-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Render 8 thẻ chuyên đề bằng JS -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW B: CHI TIẾT TỪNG CHUYÊN ĐỀ (1 -> 8) -->
+                <section id="view-topic" class="hidden space-y-8">
+                    <!-- Header Chuyên đề -->
+                    <div class="border-b border-notion-border pb-6">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <span id="topic-tag" class="px-2.5 py-1 rounded-md text-xs font-bold bg-coursera-light text-coursera-blue border border-blue-200">
+                                CHUYÊN ĐỀ 01
+                            </span>
+                            <div class="flex items-center gap-1.5">
+                                <button id="btn-prev-topic" onclick="navigateTopic(-1)" class="px-2.5 py-1.5 rounded-lg border border-notion-border hover:bg-notion-hover text-xs font-medium text-notion-text disabled:opacity-40 flex items-center gap-1 transition">
+                                    <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Trước
+                                </button>
+                                <button id="btn-next-topic" onclick="navigateTopic(1)" class="px-2.5 py-1.5 rounded-lg border border-notion-border hover:bg-notion-hover text-xs font-medium text-notion-text disabled:opacity-40 flex items-center gap-1 transition">
+                                    Tiếp <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <h2 id="topic-title" class="text-2xl sm:text-3xl font-extrabold text-notion-text tracking-tight"></h2>
+                        <p id="topic-subtitle" class="text-sm text-notion-muted mt-2 leading-relaxed"></p>
+
+                        <!-- Khối Mục tiêu học tập (Coursera Callout) -->
+                        <div class="mt-5 p-4 rounded-xl bg-coursera-light/70 border border-blue-100 flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-coursera-blue text-white flex items-center justify-center shrink-0 mt-0.5">
+                                <i data-lucide="target" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-coursera-blue">Mục tiêu học tập</h3>
+                                <ul id="topic-objectives" class="mt-1.5 space-y-1 text-xs sm:text-sm text-notion-text"></ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 1. Sơ đồ SVG Trực quan Thiết kế Riêng -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-base font-bold text-notion-text flex items-center gap-2">
+                                <i data-lucide="cpu" class="w-4 h-4 text-coursera-blue"></i>
+                                Sơ đồ Kiến trúc & Cơ chế Trực quan
+                            </h3>
+                            <span class="text-[11px] font-mono text-notion-muted bg-notion-sidebar px-2 py-0.5 rounded border border-notion-border">Vector Diagram</span>
+                        </div>
+                        <div id="topic-svg-container" class="w-full bg-slate-50/80 border border-notion-border rounded-2xl p-4 sm:p-6 overflow-x-auto flex justify-center">
+                            <!-- Sơ đồ SVG được render động theo từng chuyên đề -->
+                        </div>
+                        <p id="topic-svg-caption" class="text-xs text-center text-notion-muted italic"></p>
+                    </div>
+
+                    <!-- 2. Nội dung Lý thuyết Chuyên sâu -->
+                    <div class="space-y-4">
+                        <h3 class="text-base font-bold text-notion-text flex items-center gap-2">
+                            <i data-lucide="book-open" class="w-4 h-4 text-coursera-blue"></i>
+                            Nội dung Lý thuyết Trọng tâm
+                        </h3>
+                        <div id="topic-theory-blocks" class="space-y-4">
+                            <!-- Các khối lý thuyết render bằng JS -->
+                        </div>
+                    </div>
+
+                    <!-- 3. Ví dụ thực tiễn & Điểm nhấn cần nhớ (Notion Callouts) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-5 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 space-y-2">
+                            <div class="flex items-center gap-2 text-emerald-800 font-bold text-xs uppercase tracking-wider">
+                                <i data-lucide="lightbulb" class="w-4 h-4 text-emerald-600"></i>
+                                Ví dụ Thực tiễn
+                            </div>
+                            <p id="topic-example" class="text-sm text-notion-text leading-relaxed"></p>
+                        </div>
+                        <div class="p-5 rounded-2xl bg-amber-50/70 border border-amber-200/80 space-y-2">
+                            <div class="flex items-center gap-2 text-amber-900 font-bold text-xs uppercase tracking-wider">
+                                <i data-lucide="bookmark-check" class="w-4 h-4 text-amber-600"></i>
+                                Điểm nhấn Cần nhớ
+                            </div>
+                            <p id="topic-key-takeaway" class="text-sm text-notion-text leading-relaxed font-medium"></p>
+                        </div>
+                    </div>
+
+                    <!-- 4. Video YouTube Nhúng Minh họa -->
+                    <div class="space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <h3 class="text-base font-bold text-notion-text flex items-center gap-2">
+                                <i data-lucide="youtube" class="w-4 h-4 text-rose-600"></i>
+                                Video Bài giảng & Minh họa Trực quan
+                            </h3>
+                            <a id="topic-youtube-fallback" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-semibold text-coursera-blue hover:underline bg-coursera-light px-3 py-1.5 rounded-lg">
+                                Mở trực tiếp trên YouTube <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                            </a>
+                        </div>
+                        <div class="rounded-2xl overflow-hidden border border-notion-border bg-slate-900 shadow-xs">
+                            <div class="relative w-full pt-[56.25%]">
+                                <iframe id="topic-youtube-iframe" class="absolute inset-0 w-full h-full" src="" title="Video minh họa chuyên đề" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                        <p id="topic-video-desc" class="text-xs text-notion-muted"></p>
+                    </div>
+
+                    <!-- 5. Kho Tài liệu Chính thống & Tài liệu Cá nhân -->
+                    <div class="space-y-4 pt-2 border-t border-notion-border">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                                <h3 class="text-base font-bold text-notion-text flex items-center gap-2">
+                                    <i data-lucide="library" class="w-4 h-4 text-coursera-blue"></i>
+                                    Kho Tài liệu Chính thống & Học liệu Mở rộng
+                                </h3>
+                                <p class="text-xs text-notion-muted mt-0.5">Slide tóm tắt, bài đọc chuyên khảo và nguồn chuẩn quốc tế (MIT, Coursera, NIST, W3C, Bộ TT&TT).</p>
+                            </div>
+                            <button onclick="openAddResourceModal()" class="px-3.5 py-2 bg-coursera-blue hover:bg-coursera-dark text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition shadow-2xs">
+                                <i data-lucide="plus" class="w-4 h-4"></i> Thêm tài liệu cá nhân
+                            </button>
+                        </div>
+
+                        <div id="topic-resources-list" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                            <!-- Render danh sách tài liệu của chuyên đề -->
+                        </div>
+                    </div>
+
+                    <!-- Thanh hành động cuối chuyên đề -->
+                    <div class="p-4 rounded-2xl bg-notion-sidebar border border-notion-border flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-2">
+                            <button onclick="openFlashcardsForTopic()" class="px-3.5 py-2 bg-white hover:bg-notion-hover border border-notion-border rounded-xl text-xs font-semibold text-notion-text flex items-center gap-1.5 transition">
+                                <i data-lucide="layers" class="w-4 h-4 text-amber-600"></i> Ôn Flashcards chuyên đề này
+                            </button>
+                            <button onclick="markTopicMasteredAndNext()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+                                <i data-lucide="check-circle-2" class="w-4 h-4"></i> Hoàn thành & Chuyển bài tiếp
+                            </button>
+                        </div>
+                        <button onclick="toggleRightSidebar()" class="xl:hidden px-3.5 py-2 bg-coursera-light text-coursera-blue rounded-xl text-xs font-semibold flex items-center gap-1.5">
+                            <i data-lucide="notebook-pen" class="w-4 h-4"></i> Mở sổ ghi chú
+                        </button>
+                    </div>
+                </section>
+
+                <!-- VIEW C: THẺ GHI NHỚ (FLASHCARDS TƯƠNG TÁC 3D) -->
+                <section id="view-flashcards" class="hidden space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-notion-border pb-5">
+                        <div>
+                            <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-amber-100 text-amber-800">ACTIVE RECALL</span>
+                            <h2 class="text-2xl font-extrabold text-notion-text mt-2">Thẻ Ghi Nhớ Thuật Ngữ (Flashcards)</h2>
+                            <p class="text-xs sm:text-sm text-notion-muted mt-1">Nhấp vào thẻ (hoặc nhấn phím Space) để lật xem định nghĩa và tự đánh giá mức độ ghi nhớ.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <select id="fc-topic-filter" onchange="filterFlashcards(this.value)" class="px-3 py-2 bg-notion-sidebar border border-notion-border rounded-xl text-xs font-semibold text-notion-text focus:outline-none focus:border-coursera-blue">
+                                <option value="all">Tất cả 8 chuyên đề (24 thẻ)</option>
+                                <option value="1">Chuyên đề 1: Kiến trúc Máy tính</option>
+                                <option value="2">Chuyên đề 2: Hệ điều hành</option>
+                                <option value="3">Chuyên đề 3: Mạng & Internet</option>
+                                <option value="4">Chuyên đề 4: Dữ liệu & Big Data</option>
+                                <option value="5">Chuyên đề 5: AI & Học máy</option>
+                                <option value="6">Chuyên đề 6: Công nghệ Lõi 4.0</option>
+                                <option value="7">Chuyên đề 7: An toàn Thông tin</option>
+                                <option value="8">Chuyên đề 8: Đạo đức & Công dân Số</option>
+                            </select>
+                            <button onclick="shuffleFlashcards()" class="px-3 py-2 bg-white hover:bg-notion-hover border border-notion-border rounded-xl text-xs font-semibold text-notion-text flex items-center gap-1.5 transition" title="Trộn ngẫu nhiên">
+                                <i data-lucide="shuffle" class="w-3.5 h-3.5 text-coursera-blue"></i> Trộn thẻ
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Thanh tiến độ Flashcards -->
+                    <div class="flex items-center justify-between text-xs bg-notion-sidebar px-4 py-2.5 rounded-xl border border-notion-border">
+                        <span id="fc-counter" class="font-bold text-notion-text">Thẻ 1 / 24</span>
+                        <div class="flex items-center gap-4">
+                            <span class="text-emerald-700 font-semibold flex items-center gap-1">
+                                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Đã thuộc: <strong id="fc-known-count">0</strong>
+                            </span>
+                            <span class="text-amber-700 font-semibold flex items-center gap-1">
+                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Cần ôn: <strong id="fc-review-count">0</strong>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Thẻ Lật 3D -->
+                    <div class="perspective-1000 w-full max-w-2xl mx-auto">
+                        <div id="flashcard-inner" onclick="flipFlashcard()" class="transform-style-3d relative w-full min-h-[300px] sm:min-h-[330px] cursor-pointer select-none">
+                            <!-- Mặt trước -->
+                            <div class="backface-hidden absolute inset-0 bg-white border-2 border-notion-border hover:border-coursera-blue rounded-3xl p-6 sm:p-10 shadow-sm flex flex-col justify-between transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <span id="fc-front-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-coursera-light text-coursera-blue">Chuyên đề 1</span>
+                                    <span id="fc-status-pill" class="text-xs font-medium text-notion-muted flex items-center gap-1">
+                                        <i data-lucide="repeat" class="w-3.5 h-3.5"></i> Nhấp để lật thẻ
+                                    </span>
+                                </div>
+                                <div class="my-auto text-center py-6">
+                                    <p class="text-[11px] font-bold uppercase tracking-widest text-notion-muted mb-2">Thuật ngữ / Câu hỏi</p>
+                                    <h3 id="fc-front-text" class="text-xl sm:text-2xl font-extrabold text-notion-text leading-snug"></h3>
+                                </div>
+                                <div class="text-center text-xs text-notion-muted">
+                                    Mặt trước • Nhấn vào thẻ để xem giải thích
+                                </div>
+                            </div>
+
+                            <!-- Mặt sau -->
+                            <div class="backface-hidden rotate-y-180 absolute inset-0 bg-gradient-to-br from-coursera-light to-white border-2 border-coursera-blue rounded-3xl p-6 sm:p-10 shadow-md flex flex-col justify-between">
+                                <div class="flex items-center justify-between">
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-coursera-blue text-white">Định nghĩa & Giải thích</span>
+                                    <span class="text-xs font-medium text-coursera-blue flex items-center gap-1">
+                                        <i data-lucide="repeat" class="w-3.5 h-3.5"></i> Lật lại mặt trước
+                                    </span>
+                                </div>
+                                <div class="my-auto text-center py-4">
+                                    <p id="fc-back-text" class="text-base sm:text-lg font-medium text-notion-text leading-relaxed"></p>
+                                </div>
+                                <div class="text-center text-xs text-coursera-blue font-medium">
+                                    Hãy chọn mức độ ghi nhớ của bạn bên dưới
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bộ nút điều khiển Flashcard -->
+                    <div class="max-w-2xl mx-auto flex flex-wrap items-center justify-between gap-3 pt-2">
+                        <button onclick="prevFlashcard()" class="px-4 py-2.5 bg-white hover:bg-notion-hover border border-notion-border rounded-xl text-xs font-semibold text-notion-text flex items-center gap-1.5 transition">
+                            <i data-lucide="chevron-left" class="w-4 h-4"></i> Thẻ trước
+                        </button>
+
+                        <div class="flex items-center gap-2.5">
+                            <button onclick="markFlashcardStatus('review')" class="px-4 py-2.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Cần ôn lại
+                            </button>
+                            <button onclick="markFlashcardStatus('known')" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-2xs transition">
+                                <i data-lucide="check" class="w-4 h-4"></i> Đã thuộc
+                            </button>
+                        </div>
+
+                        <button onclick="nextFlashcard()" class="px-4 py-2.5 bg-white hover:bg-notion-hover border border-notion-border rounded-xl text-xs font-semibold text-notion-text flex items-center gap-1.5 transition">
+                            Thẻ tiếp <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- VIEW D: HỆ THỐNG TRẮC NGHIỆM KIỂM TRA NHANH 10 CÂU -->
+                <section id="view-quiz" class="hidden space-y-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-notion-border pb-5">
+                        <div>
+                            <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800">ASSESSMENT • 10 CÂU HỎI</span>
+                            <h2 class="text-2xl font-extrabold text-notion-text mt-2">Kiểm tra Nhanh Kiến thức CNTT & Số 4.0</h2>
+                            <p class="text-xs sm:text-sm text-notion-muted mt-1">Đề thi ngẫu nhiên 10 câu phủ đều 8 chuyên đề, có chấm điểm tự động và giải thích chi tiết.</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="px-3.5 py-2 rounded-xl bg-notion-sidebar border border-notion-border text-right">
+                                <span class="block text-[10px] uppercase font-bold text-notion-muted">Điểm cao nhất</span>
+                                <span id="quiz-best-score" class="text-sm font-extrabold text-coursera-blue">--/10</span>
+                            </div>
+                            <div class="px-3.5 py-2 rounded-xl bg-coursera-light border border-blue-200 text-right">
+                                <span class="block text-[10px] uppercase font-bold text-coursera-blue">Thời gian</span>
+                                <span id="quiz-timer" class="text-sm font-mono font-bold text-coursera-blue">00:00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Màn hình Bắt đầu Quiz -->
+                    <div id="quiz-start-screen" class="bg-notion-sidebar border border-notion-border rounded-2xl p-8 text-center space-y-4">
+                        <div class="w-14 h-14 rounded-2xl bg-coursera-blue text-white flex items-center justify-center mx-auto shadow-sm">
+                            <i data-lucide="file-check-2" class="w-7 h-7"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-notion-text">Sẵn sàng thử thách 10 câu hỏi tổng hợp?</h3>
+                        <p class="text-sm text-notion-muted max-w-lg mx-auto">
+                            Hệ thống sẽ chọn ngẫu nhiên 10 câu hỏi từ ngân hàng kiến thức 8 chuyên đề. Sau khi nộp bài, bạn sẽ nhận được giải thích chi tiết cho từng đáp án.
+                        </p>
+                        <button onclick="startNewQuiz()" class="px-6 py-3 bg-coursera-blue hover:bg-coursera-dark text-white text-sm font-bold rounded-xl shadow-xs transition inline-flex items-center gap-2">
+                            <i data-lucide="play-circle" class="w-4 h-4"></i> Bắt đầu làm bài (10 câu)
+                        </button>
+                    </div>
+
+                    <!-- Màn hình Đang làm bài / Xem kết quả -->
+                    <div id="quiz-active-screen" class="hidden space-y-6">
+                        <!-- Banner Kết quả sau khi nộp bài -->
+                        <div id="quiz-result-banner" class="hidden p-6 rounded-2xl bg-gradient-to-r from-coursera-light to-emerald-50 border border-blue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <span class="text-xs font-bold uppercase tracking-wider text-coursera-blue">Kết quả đánh giá</span>
+                                <h3 id="quiz-score-headline" class="text-2xl font-extrabold text-notion-text mt-1">Bạn đạt 8/10 điểm!</h3>
+                                <p id="quiz-score-feedback" class="text-xs sm:text-sm text-notion-muted mt-1"></p>
+                            </div>
+                            <button onclick="startNewQuiz()" class="px-4 py-2.5 bg-coursera-blue hover:bg-coursera-dark text-white text-xs font-bold rounded-xl shrink-0 flex items-center gap-1.5 transition">
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i> Làm đề mới
+                            </button>
+                        </div>
+
+                        <!-- Danh sách 10 câu hỏi -->
+                        <div id="quiz-questions-container" class="space-y-5">
+                            <!-- Render 10 câu hỏi bằng JS -->
+                        </div>
+
+                        <!-- Nút Nộp bài -->
+                        <div id="quiz-submit-bar" class="pt-4 border-t border-notion-border flex items-center justify-between">
+                            <span id="quiz-answered-count" class="text-xs font-semibold text-notion-muted">Đã trả lời: 0/10 câu</span>
+                            <button onclick="submitQuiz()" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-xs transition flex items-center gap-2">
+                                <i data-lucide="send" class="w-4 h-4"></i> Nộp bài & Chấm điểm
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+
+        <!-- ==================== 3. THANH CÔNG CỤ GHI CHÚ & TIẾN ĐỘ PHẢI ==================== -->
+        <aside id="right-sidebar" class="fixed xl:sticky top-0 right-0 z-40 h-screen w-80 sm:w-96 bg-notion-sidebar border-l border-notion-border flex flex-col transition-transform duration-300 translate-x-full xl:translate-x-0 shrink-0">
+            <!-- Header Panel Phải -->
+            <div class="p-4 border-b border-notion-border flex items-center justify-between bg-white">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="notebook-pen" class="w-4 h-4 text-coursera-blue"></i>
+                    <h2 class="font-bold text-sm text-notion-text">Sổ Ghi Chú Cá Nhân</h2>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="note-save-indicator" class="text-[11px] font-medium text-emerald-600 flex items-center gap-1">
+                        <i data-lucide="cloud-check" class="w-3.5 h-3.5"></i> Đã lưu
+                    </span>
+                    <button onclick="toggleRightSidebar()" class="xl:hidden p-1 rounded-lg hover:bg-notion-hover text-notion-muted">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chọn Chuyên đề đang ghi chú -->
+            <div class="p-3.5 border-b border-notion-border bg-notion-sidebar space-y-2.5">
+                <div class="flex items-center justify-between gap-2">
+                    <label for="note-topic-selector" class="text-[11px] font-bold uppercase tracking-wider text-notion-muted">Đang ghi chú cho:</label>
+                    <select id="note-topic-selector" onchange="selectNoteTopic(Number(this.value))" class="text-xs font-semibold bg-white border border-notion-border rounded-lg px-2 py-1 text-notion-text max-w-[190px] truncate focus:outline-none focus:border-coursera-blue">
+                        <!-- Render 8 option chuyên đề -->
+                    </select>
+                </div>
+
+                <!-- Nút chèn mẫu ghi chú nhanh (Cornell / Tóm tắt) -->
+                <div class="flex items-center gap-1.5">
+                    <button onclick="insertNoteTemplate('cornell')" class="flex-1 py-1.5 px-2 bg-white hover:bg-notion-hover border border-notion-border rounded-lg text-[11px] font-medium text-notion-text transition flex items-center justify-center gap-1" title="Chèn khung ghi chú Cornell">
+                        <i data-lucide="columns" class="w-3 h-3 text-coursera-blue"></i> Mẫu Cornell
+                    </button>
+                    <button onclick="insertNoteTemplate('summary')" class="flex-1 py-1.5 px-2 bg-white hover:bg-notion-hover border border-notion-border rounded-lg text-[11px] font-medium text-notion-text transition flex items-center justify-center gap-1" title="Chèn khung tóm tắt 3 ý">
+                        <i data-lucide="list-plus" class="w-3 h-3 text-emerald-600"></i> Mẫu Tóm tắt
+                    </button>
+                </div>
+            </div>
+
+            <!-- Vùng Soạn thảo Ghi chú Tự động Lưu -->
+            <div class="flex-1 p-4 flex flex-col min-h-0 bg-white">
+                <textarea id="personal-note-editor" oninput="handleNoteInput(this.value)" placeholder="Viết ghi chú học tập, tóm tắt khái niệm hoặc câu hỏi thắc mắc cho chuyên đề này...&#10;&#10;Mọi thay đổi được tự động lưu vào trình duyệt (localStorage)." class="flex-1 w-full resize-none border-0 focus:outline-none text-sm text-notion-text leading-relaxed placeholder:text-notion-muted/70 bg-transparent"></textarea>
+            </div>
+
+            <!-- Thống kê Tiến độ & Từ khóa nhanh ở đáy Panel Phải -->
+            <div class="p-4 border-t border-notion-border bg-notion-sidebar space-y-3">
+                <div class="flex items-center justify-between text-xs">
+                    <span class="font-semibold text-notion-text">Tiến độ toàn khóa học</span>
+                    <span id="right-panel-progress-pct" class="font-bold text-coursera-blue">0%</span>
+                </div>
+                <div class="w-full h-2 bg-notion-border rounded-full overflow-hidden">
+                    <div id="right-panel-progress-bar" class="h-full bg-coursera-blue rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <div class="grid grid-cols-3 gap-2 pt-1 text-center">
+                    <div class="bg-white border border-notion-border rounded-lg p-2">
+                        <span id="stat-mastered" class="block text-sm font-extrabold text-emerald-600">0</span>
+                        <span class="text-[10px] text-notion-muted">Nắm vững</span>
+                    </div>
+                    <div class="bg-white border border-notion-border rounded-lg p-2">
+                        <span id="stat-inprogress" class="block text-sm font-extrabold text-amber-600">0</span>
+                        <span class="text-[10px] text-notion-muted">Đang ôn</span>
+                    </div>
+                    <div class="bg-white border border-notion-border rounded-lg p-2">
+                        <span id="stat-notstarted" class="block text-sm font-extrabold text-slate-500">8</span>
+                        <span class="text-[10px] text-notion-muted">Chưa học</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- ==================== MODAL XEM NHANH SLIDE & THÊM TÀI LIỆU ==================== -->
+
+    <!-- Modal 1: Xem nhanh Nội dung Slide / Tài liệu Mô phỏng -->
+    <div id="modal-doc-preview" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-[1px] p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-xl border border-notion-border max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between border-b border-notion-border pb-3 mb-4">
+                <div class="flex items-center gap-2 min-w-0">
+                    <span id="preview-doc-type" class="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-100 text-coursera-blue">PDF</span>
+                    <h3 id="preview-doc-title" class="text-base font-bold text-notion-text truncate">Tài liệu chuyên đề</h3>
+                </div>
+                <button onclick="closeModal('modal-doc-preview')" class="p-1 rounded-lg hover:bg-notion-hover text-notion-muted">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="preview-doc-body" class="flex-1 overflow-y-auto space-y-3 text-sm text-notion-text leading-relaxed bg-notion-sidebar p-4 rounded-xl border border-notion-border">
+                <!-- Nội dung xem nhanh -->
+            </div>
+            <div class="mt-4 pt-3 border-t border-notion-border flex justify-between items-center">
+                <span id="preview-doc-source" class="text-xs text-notion-muted">Nguồn: Học liệu chuẩn</span>
+                <div class="flex gap-2">
+                    <button onclick="downloadPreviewAsTxt()" class="px-3.5 py-2 bg-coursera-blue hover:bg-coursera-dark text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition">
+                        <i data-lucide="download" class="w-3.5 h-3.5"></i> Tải bản tóm tắt (.txt)
+                    </button>
+                    <button onclick="closeModal('modal-doc-preview')" class="px-4 py-2 bg-notion-sidebar hover:bg-notion-hover text-notion-text text-xs font-semibold rounded-xl">
+                        Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Thêm Tài liệu / Liên kết Cá nhân vào Chuyên đề -->
+    <div id="modal-add-resource" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-[1px] p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-notion-border">
+            <div class="flex items-center justify-between border-b border-notion-border pb-3 mb-4">
+                <h3 class="text-base font-bold text-notion-text flex items-center gap-2">
+                    <i data-lucide="folder-plus" class="w-4 h-4 text-coursera-blue"></i>
+                    Thêm Tài liệu vào Chuyên đề
+                </h3>
+                <button onclick="closeModal('modal-add-resource')" class="p-1 rounded-lg hover:bg-notion-hover text-notion-muted">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form onsubmit="handleAddResource(event)" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-semibold text-notion-text mb-1">Tiêu đề tài liệu / Liên kết *</label>
+                    <input type="text" id="res-title" required placeholder="VD: Giáo trình Kiến trúc máy tính - Chương 2" class="w-full px-3 py-2 border border-notion-border rounded-xl text-sm focus:outline-none focus:border-coursera-blue">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-notion-text mb-1">Loại học liệu</label>
+                        <select id="res-type" class="w-full px-3 py-2 border border-notion-border rounded-xl text-sm bg-white focus:outline-none focus:border-coursera-blue">
+                            <option value="LINK">Liên kết Web</option>
+                            <option value="PDF">Tài liệu PDF</option>
+                            <option value="SLIDE">Bài giảng Slide</option>
+                            <option value="DOC">Tài liệu Word</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-notion-text mb-1">Nguồn / Tổ chức</label>
+                        <input type="text" id="res-source" placeholder="VD: MIT OCW / Cá nhân" class="w-full px-3 py-2 border border-notion-border rounded-xl text-sm focus:outline-none focus:border-coursera-blue">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-notion-text mb-1">Đường dẫn URL (Nếu có)</label>
+                    <input type="url" id="res-url" placeholder="https://..." class="w-full px-3 py-2 border border-notion-border rounded-xl text-sm focus:outline-none focus:border-coursera-blue">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-notion-text mb-1">Mô tả ngắn gọn</label>
+                    <textarea id="res-desc" rows="2" placeholder="Ghi chú nội dung chính của tài liệu..." class="w-full px-3 py-2 border border-notion-border rounded-xl text-sm focus:outline-none focus:border-coursera-blue"></textarea>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('modal-add-resource')" class="px-4 py-2 text-xs font-semibold text-notion-muted hover:bg-notion-hover rounded-xl">Hủy</button>
+                    <button type="submit" class="px-4 py-2 text-xs font-semibold bg-coursera-blue hover:bg-coursera-dark text-white rounded-xl">Lưu tài liệu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== DỮ LIỆU HỌC THUẬT & LOGIC ỨNG DỤNG ==================== -->
+    <script>
+        // 1. CƠ SỞ DỮ LIỆU 8 CHUYÊN ĐỀ NHẬP MÔN CNTT & KỶ NGUYÊN SỐ 4.0
+        const TOPICS_DATA = [
+            {
+                id: 1,
+                shortTitle: "Kiến trúc Máy tính & Hệ số",
+                title: "Chuyên đề 1: Kiến trúc Máy tính & Hệ thống Số",
+                subtitle: "Khám phá cấu trúc phần cứng nền tảng theo mô hình Von Neumann, cơ chế xử lý lệnh của CPU, phân cấp bộ nhớ và ngôn ngữ nhị phân của máy tính.",
+                objectives: [
+                    "Phân tích được 5 thành phần cốt lõi trong kiến trúc máy tính Von Neumann.",
+                    "Phân biệt vai trò và tốc độ của CPU (ALU, CU, Registers), RAM và bộ nhớ lưu trữ (SSD/HDD).",
+                    "Hiểu cách biểu diễn dữ liệu bằng hệ nhị phân (Binary) và hệ thập lục phân (Hexadecimal)."
+                ],
+                svgCaption: "Hình 1.1: Mô hình Kiến trúc Máy tính Von Neumann & Hệ thống biểu diễn dữ liệu nhị phân",
+                svgMarkup: `
+                    <svg viewBox="0 0 760 270" class="w-full max-w-3xl h-auto" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <marker id="arrow1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M 0 1 L 10 5 L 0 9 z" fill="#0056D2"/>
+                            </marker>
+                            <marker id="arrowGray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748B"/>
+                            </marker>
+                        </defs>
+                        <!-- Input -->
+                        <rect x="20" y="85" width="130" height="90" rx="12" fill="#EFF6FF" stroke="#0056D2" stroke-width="2"/>
+                        <text x="85" y="122" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="13" fill="#1E3A8A">THIẾT BỊ NHẬP</text>
+                        <text x="85" y="142" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#475569">Bàn phím, Chuột,</text>
+                        <text x="85" y="157" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#475569">Cảm biến, Mic</text>
+
+                        <!-- CPU Container -->
+                        <rect x="210" y="25" width="320" height="150" rx="16" fill="#FFFFFF" stroke="#0056D2" stroke-width="2.5"/>
+                        <rect x="210" y="25" width="320" height="32" rx="14" fill="#0056D2"/>
+                        <text x="370" y="46" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#FFFFFF">BỘ XỬ LÝ TRUNG TÂM (CPU)</text>
+                        
+                        <rect x="228" y="72" width="135" height="44" rx="8" fill="#F0F6FF" stroke="#93C5FD"/>
+                        <text x="295" y="91" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="11" fill="#1E40AF">Khối Điều khiển (CU)</text>
+                        <text x="295" y="106" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#475569">Giải mã & điều phối lệnh</text>
+
+                        <rect x="378" y="72" width="135" height="44" rx="8" fill="#F0F6FF" stroke="#93C5FD"/>
+                        <text x="445" y="91" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="11" fill="#1E40AF">Khối Tính toán (ALU)</text>
+                        <text x="445" y="106" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#475569">Số học & Phép toán Logic</text>
+
+                        <rect x="228" y="126" width="285" height="34" rx="8" fill="#FEF3C7" stroke="#F59E0B"/>
+                        <text x="370" y="147" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="600" font-size="11" fill="#92400E">Thanh ghi (Registers) & Bộ nhớ đệm (Cache L1/L2/L3)</text>
+
+                        <!-- Memory & Storage -->
+                        <rect x="210" y="198" width="150" height="56" rx="12" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+                        <text x="285" y="222" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#065F46">BỘ NHỚ CHÍNH (RAM)</text>
+                        <text x="285" y="239" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#047857">Tạm thời • Tốc độ rất cao</text>
+
+                        <rect x="380" y="198" width="150" height="56" rx="12" fill="#F8FAFC" stroke="#64748B" stroke-width="2"/>
+                        <text x="455" y="222" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#334155">LƯU TRỮ (SSD/HDD)</text>
+                        <text x="455" y="239" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#475569">Bền vững • Dung lượng lớn</text>
+
+                        <!-- Output -->
+                        <rect x="590" y="85" width="150" height="90" rx="12" fill="#EFF6FF" stroke="#0056D2" stroke-width="2"/>
+                        <text x="665" y="122" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="13" fill="#1E3A8A">THIẾT BỊ XUẤT</text>
+                        <text x="665" y="142" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#475569">Màn hình, Loa, Máy in,</text>
+                        <text x="665" y="157" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#475569">Bộ truyền động Robot</text>
+
+                        <!-- Arrows -->
+                        <line x1="150" y1="130" x2="204" y2="130" stroke="#0056D2" stroke-width="2.2" marker-end="url(#arrow1)"/>
+                        <line x1="530" y1="130" x2="584" y2="130" stroke="#0056D2" stroke-width="2.2" marker-end="url(#arrow1)"/>
+                        <line x1="285" y1="175" x2="285" y2="194" stroke="#059669" stroke-width="2" marker-start="url(#arrowGray)" marker-end="url(#arrowGray)"/>
+                        <line x1="360" y1="226" x2="376" y2="226" stroke="#64748B" stroke-width="2" marker-start="url(#arrowGray)" marker-end="url(#arrowGray)"/>
+                    </svg>
+                `,
+                theoryBlocks: [
+                    {
+                        heading: "1. Bộ xử lý trung tâm (CPU) & Chu kỳ lệnh",
+                        content: "CPU được ví như bộ não của máy tính, hoạt động theo chu kỳ <strong>Fetch (Nạp lệnh) → Decode (Giải mã) → Execute (Thực thi)</strong>. Bên trong gồm Khối điều khiển (CU), Khối tính toán số học và logic (ALU) cùng các thanh ghi siêu tốc (Registers)."
+                    },
+                    {
+                        heading: "2. Phân cấp Bộ nhớ (RAM vs. Lưu trữ thứ cấp)",
+                        content: "<strong>RAM (Random Access Memory)</strong> lưu dữ liệu và chương trình đang chạy; dữ liệu sẽ mất khi tắt nguồn (bộ nhớ khả biến). Ngược lại, <strong>SSD (Solid State Drive)</strong> sử dụng chip nhớ Flash không có bộ phận cơ học, cho tốc độ truy xuất nhanh gấp nhiều lần ổ đĩa từ <strong>HDD</strong> truyền thống."
+                    },
+                    {
+                        heading: "3. Hệ thống Số: Nhị phân (Base-2) & Thập lục phân (Base-16)",
+                        content: "Mọi dữ liệu số đều quy về hai trạng thái điện áp: <code>0</code> và <code>1</code> (Bit). <code>8 bits = 1 Byte</code>. Để rút gọn chuỗi nhị phân dài, lập trình viên dùng hệ Thập lục phân (Hex: <code>0–9</code> và <code>A–F</code>), trong đó mỗi ký tự Hex đại diện chính xác cho 4 bit (ví dụ: <code>1111 1111₂ = FF₁₆ = 255₁₀</code>)."
+                    }
+                ],
+                example: "Khi bạn mở một tệp văn bản trên Word, hệ điều hành sao chép tệp từ ổ cứng SSD lên RAM để CPU có thể đọc và chỉnh sửa từng ký tự với tốc độ nano-giây. Mã màu #0056D2 trên trang web này thực chất là 3 cặp số Hex biểu diễn cường độ Đỏ (00), Xanh lá (56) và Xanh dương (D2).",
+                keyTakeaway: "Hiệu năng tổng thể của máy tính phụ thuộc vào sự cân bằng giữa tốc độ xung nhịp/số nhân CPU, dung lượng RAM đủ lớn để tránh nghẽn cổ chai và tốc độ đọc/ghi của ổ cứng SSD.",
+                youtubeId: "AkFi90lZmXA",
+                youtubeUrl: "https://www.youtube.com/watch?v=AkFi90lZmXA",
+                videoDesc: "Video minh họa trực quan cách CPU, RAM, ổ cứng và các cổng nhập/xuất phối hợp xử lý một cú nhấp chuột (TED-Ed).",
+                resources: [
+                    {
+                        id: "r1_1",
+                        type: "SLIDE",
+                        title: "Slide tóm tắt Chuyên đề 1: Kiến trúc Von Neumann & Hệ đếm",
+                        source: "Học liệu chuẩn CNTT 4.0",
+                        url: "",
+                        desc: "Tổng hợp sơ đồ khối CPU, bảng quy đổi Binary - Decimal - Hexadecimal và đơn vị đo dữ liệu (KB, MB, GB, TB).",
+                        previewText: "NỘI DUNG SLIDE CHUYÊN ĐỀ 1:\n1. Kiến trúc Von Neumann (1945): Lưu trữ chương trình và dữ liệu trong cùng một không gian bộ nhớ.\n2. Đơn vị đo thông tin: 1 Byte = 8 bits; 1 KB = 1024 Bytes; 1 MB = 1024 KB; 1 GB = 1024 MB.\n3. Bảng quy đổi nhanh: 1010₂ = A₁₆ = 10₁₀ | 1111₂ = F₁₆ = 15₁₀."
+                    },
+                    {
+                        id: "r1_2",
+                        type: "LINK",
+                        title: "MIT OpenCourseWare - Computation Structures",
+                        source: "MIT OCW",
+                        url: "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/",
+                        desc: "Khóa học mở của Viện Công nghệ Massachusetts về kiến trúc máy tính và thiết kế vi xử lý."
+                    }
+                ]
+            },
+            {
+                id: 2,
+                shortTitle: "Hệ điều hành & Tài nguyên Số",
+                title: "Chuyên đề 2: Hệ điều hành & Quản lý Tài nguyên Số",
+                subtitle: "Tìm hiểu lớp phần mềm hệ thống làm cầu nối giữa phần cứng và người dùng: Windows, Linux, macOS, quản lý tiến trình, bộ nhớ và cây thư mục.",
+                objectives: [
+                    "Giải thích được vai trò của Nhân hệ điều hành (Kernel) trong việc điều phối CPU, RAM và thiết bị ngoại vi.",
+                    "So sánh đặc điểm kiến trúc của Windows, Linux và macOS trong học tập và doanh nghiệp.",
+                    "Tổ chức hệ thống tập tin (File System) khoa học và nắm vững cơ chế phân quyền cơ bản."
+                ],
+                svgCaption: "Hình 2.1: Mô hình Phân lớp Hệ điều hành (User Space vs. Kernel Space)",
+                svgMarkup: `
+                    <svg viewBox="0 0 760 250" class="w-full max-w-3xl h-auto" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Layer 1: User Applications -->
+                        <rect x="80" y="20" width="600" height="46" rx="10" fill="#EFF6FF" stroke="#0056D2" stroke-width="2"/>
+                        <text x="380" y="41" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="13" fill="#1E3A8A">ỨNG DỤNG NGƯỜI DÙNG (User Applications)</text>
+                        <text x="380" y="57" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#475569">Trình duyệt Web, Bộ Office, Trình biên dịch, Phần mềm AI</text>
+
+                        <!-- Layer 2: Shell / GUI & CLI -->
+                        <rect x="80" y="78" width="600" height="44" rx="10" fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
+                        <text x="380" y="98" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="13" fill="#166534">GIAO DIỆN TƯƠNG TÁC (GUI & Command Line Shell)</text>
+                        <text x="380" y="113" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#15803D">Windows Explorer, macOS Finder, Linux Bash/Zsh Terminal</text>
+
+                        <!-- Layer 3: OS Kernel -->
+                        <rect x="80" y="134" width="600" height="48" rx="10" fill="#0056D2"/>
+                        <text x="380" y="155" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="13" fill="#FFFFFF">NHÂN HỆ ĐIỀU HÀNH (OS KERNEL)</text>
+                        <text x="380" y="171" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#DBEAFE">Quản lý Tiến trình (Process) • Cấp phát RAM • Hệ thống tệp (NTFS/ext4/APFS) • Driver</text>
+
+                        <!-- Layer 4: Hardware -->
+                        <rect x="80" y="194" width="600" height="42" rx="10" fill="#1E293B"/>
+                        <text x="380" y="219" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="13" fill="#F8FAFC">PHẦN CỨNG VẬT LÝ (CPU • RAM • SSD • Card Mạng • GPU)</text>
+                    </svg>
+                `,
+                theoryBlocks: [
+                    {
+                        heading: "1. Chức năng cốt lõi của Hệ điều hành (Operating System)",
+                        content: "Hệ điều hành quản lý 4 tài nguyên chính: <strong>Đa nhiệm tiến trình (Multitasking)</strong> qua cơ chế lập lịch CPU; <strong>Quản lý bộ nhớ ảo (Virtual Memory)</strong>; <strong>Hệ thống tập tin (File System)</strong>; và <strong>Điều khiển thiết bị (Device Drivers)</strong>."
+                    },
+                    {
+                        heading: "2. So sánh Windows, Linux và macOS",
+                        content: "<strong>Windows:</strong> Phổ biến nhất trên máy tính cá nhân, tương thích phần mềm văn phòng và đồ họa rộng rãi (hệ tệp NTFS). <strong>macOS:</strong> Xây dựng trên nền tảng Unix, tối ưu hóa chặt chẽ với phần cứng Apple (hệ tệp APFS). <strong>Linux (Ubuntu, Fedora...):</strong> Mã nguồn mở, bảo mật cao, thống trị máy chủ Cloud, siêu máy tính và hạ tầng AI (hệ tệp ext4)."
+                    },
+                    {
+                        heading: "3. Quản lý Tập tin & Bảo mật Quyền truy cập",
+                        content: "Tổ chức dữ liệu theo cấu trúc cây thư mục phân cấp với quy tắc đặt tên chuẩn (không dấu, phân tách bằng dấu gạch dưới). Hệ điều hành bảo vệ tài nguyên thông qua tài khoản người dùng (Standard User vs. Administrator/Root) và phân quyền <code>Read (r) / Write (w) / Execute (x)</code>."
+                    }
+                ],
+                example: "Khi bạn vừa nghe nhạc trên Spotify, vừa tải tài liệu trên Chrome và gõ báo cáo trên Word, bộ lập lịch của Hệ điều hành chia thời gian CPU thành hàng nghìn lát cắt mili-giây để cả ba ứng dụng chạy mượt mà đồng thời.",
+                keyTakeaway: "Nắm vững cả giao diện đồ họa (GUI) lẫn dòng lệnh cơ bản (CLI/Terminal) và thói quen phân quyền người dùng chuẩn giúp làm việc an toàn, hiệu quả trên mọi nền tảng.",
+                youtubeId: "26QPDBe-NB8",
+                youtubeUrl: "https://www.youtube.com/watch?v=26QPDBe-NB8",
+                videoDesc: "Crash Course Computer Science: Lịch sử phát triển và cơ chế điều phối tài nguyên của Hệ điều hành.",
+                resources: [
+                    {
+                        id: "r2_1",
+                        type: "SLIDE",
+                        title: "Slide tóm tắt Chuyên đề 2: Hệ điều hành & Quản lý Tệp",
+                        source: "Học liệu chuẩn CNTT 4.0",
+                        url: "",
+                        desc: "So sánh hệ thống tập tin NTFS, APFS, ext4 và bộ phím tắt/lệnh quản trị cơ bản.",
+                        previewText: "NỘI DUNG SLIDE CHUYÊN ĐỀ 2:\n1. Kernel (Nhân): Cầu nối trực tiếp giữa phần mềm và phần cứng.\n2. Hệ thống tệp: Windows (NTFS), macOS (APFS), Linux (ext4).\n3. Nguyên tắc an toàn: Chỉ dùng quyền Administrator/sudo khi cài đặt phần mềm tin cậy."
+                    },
+                    {
+                        id: "r2_2",
+                        type: "LINK",
+                        title: "Linux Foundation - Introduction to Linux",
+                        source: "Linux Foundation",
+                        url: "https://training.linuxfoundation.org/training/introduction-to-linux/",
+                        desc: "Tài liệu nhập môn hệ điều hành mã nguồn mở Linux và dòng lệnh quản trị hệ thống."
+                    }
+                ]
+            },
+            {
+                id: 3,
+                shortTitle: "Mạng Máy tính & Internet",
+                title: "Chuyên đề 3: Mạng Máy tính & Hạ tầng Internet",
+                subtitle: "Tìm hiểu cách dữ liệu di chuyển xuyên lục địa qua mô hình TCP/IP, hệ thống định danh IP/DNS, giao thức bảo mật HTTPS và Điện toán đám mây.",
+                objectives: [
+                    "Nắm được cấu trúc 4 tầng của mô hình TCP/IP và đối chiếu với mô hình tham chiếu OSI 7 tầng.",
+                    "Giải thích được cơ chế hoạt động của địa chỉ IP (IPv4/IPv6), hệ thống phân giải tên miền DNS và giao thức HTTP/HTTPS.",
+                    "Phân biệt 3 mô hình dịch vụ Điện toán đám mây: IaaS, PaaS và SaaS."
+                ],
+                svgCaption: "Hình 3.1: Hành trình Truy cập Web qua DNS, Giao thức HTTPS & Mô hình Điện toán Đám mây",
+                svgMarkup: `
+                    <svg viewBox="0 0 760 255" class="w-full max-w-3xl h-auto" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <marker id="arrowBlue3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M 0 1 L 10 5 L 0 9 z" fill="#0056D2"/>
+                            </marker>
+                        </defs>
+                        <!-- Client -->
+                        <rect x="25" y="75" width="145" height="105" rx="14" fill="#EFF6FF" stroke="#0056D2" stroke-width="2"/>
+                        <text x="97" y="112" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#1E3A8A">THIẾT BỊ CLIENT</text>
+                        <text x="97" y="130" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#475569">Trình duyệt Web</text>
+                        <text x="97" y="148" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#0056D2">IP: 192.168.1.10</text>
+
+                        <!-- DNS Server -->
+                        <rect x="265" y="18" width="210" height="64" rx="12" fill="#FEF3C7" stroke="#D97706" stroke-width="2"/>
+                        <text x="370" y="42" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#92400E">1. MÁY CHỦ DNS</text>
+                        <text x="370" y="60" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#78350F">Dịch tên miền → Địa chỉ IP</text>
+
+                        <!-- Cloud / Web Server -->
+                        <rect x="555" y="65" width="180" height="125" rx="16" fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
+                        <text x="645" y="96" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#166534">3. CLOUD SERVER</text>
+                        <text x="645" y="115" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#15803D">IP: 142.250.190.46</text>
+                        <rect x="573" y="128" width="144" height="46" rx="8" fill="#FFFFFF" stroke="#86EFAC"/>
+                        <text x="645" y="147" text-anchor="middle" font-family="Inter, sans-serif" font-weight="600" font-size="10" fill="#166534">IaaS • PaaS • SaaS</text>
+                        <text x="645" y="162" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#475569">Chứng chỉ TLS/HTTPS</text>
+
+                        <!-- TCP/IP Stack Box -->
+                        <rect x="245" y="145" width="250" height="88" rx="12" fill="#FFFFFF" stroke="#64748B" stroke-width="1.8"/>
+                        <text x="370" y="165" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="11" fill="#334155">2. CHỒNG GIAO THỨC TCP/IP</text>
+                        <text x="370" y="183" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#475569">Ứng dụng (HTTPS) → Giao vận (TCP)</text>
+                        <text x="370" y="199" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#475569">Internet (IP) → Truy cập mạng (Wi-Fi/Cáp quang)</text>
+                        <text x="370" y="218" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#0056D2">Mã hóa đầu cuối TLS 1.3</text>
+
+                        <!-- Connections -->
+                        <path d="M 140 75 L 260 50" stroke="#D97706" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrowBlue3)"/>
+                        <line x1="170" y1="128" x2="548" y2="128" stroke="#0056D2" stroke-width="2.5" marker-start="url(#arrowBlue3)" marker-end="url(#arrowBlue3)"/>
+                    </svg>
+                `,
+                theoryBlocks: [
+                    {
+                        heading: "1. Mô hình TCP/IP & Địa chỉ định danh Mạng",
+                        content: "Mọi thiết bị kết nối Internet đều cần địa chỉ <strong>IP (IPv4 dạng 32-bit hoặc IPv6 dạng 128-bit)</strong>. Hệ thống <strong>DNS (Domain Name System)</strong> đóng vai trò như danh bạ điện thoại của Internet, chuyển đổi tên miền dễ nhớ (như <code>coursera.org</code>) thành địa chỉ IP tương ứng."
+                    },
+                    {
+                        heading: "2. Giao thức HTTP và HTTPS",
+                        content: "<strong>HTTP</strong> truyền tải siêu văn bản dưới dạng văn bản thuần (dễ bị nghe lén trên mạng công cộng). <strong>HTTPS</strong> bổ sung lớp mã hóa <strong>TLS/SSL</strong> giúp bảo mật dữ liệu truyền đi, xác thực danh tính máy chủ và đảm bảo tính toàn vẹn nội dung."
+                    },
+                    {
+                        heading: "3. Điện toán Đám mây (Cloud Computing)",
+                        content: "Cung cấp tài nguyên CNTT theo nhu cầu qua Internet gồm 3 mô hình chính: <strong>IaaS</strong> (Hạ tầng như dịch vụ - AWS EC2), <strong>PaaS</strong> (Nền tảng như dịch vụ - Google App Engine) và <strong>SaaS</strong> (Phần mềm như dịch vụ - Google Workspace, Microsoft 365, Notion)."
+                    }
+                ],
+                example: "Khi bạn gõ địa chỉ trang web học tập trên trình duyệt, hệ thống DNS mất vài chục mili-giây để tìm IP máy chủ; sau đó trình duyệt thiết lập kết nối HTTPS (biểu tượng ổ khóa) trước khi tải bài giảng về máy.",
+                keyTakeaway: "Luôn kiểm tra giao thức HTTPS khi đăng nhập hoặc nhập thông tin cá nhân trên web, và hiểu rõ ranh giới trách nhiệm bảo mật khi lưu trữ dữ liệu trên các dịch vụ đám mây SaaS.",
+                youtubeId: "7_LPdttKXPc",
+                youtubeUrl: "https://www.youtube.com/watch?v=7_LPdttKXPc",
+                videoDesc: "Giải thích trực quan cách hoạt động của mạng Internet, gói tin (Packets), Router và giao thức định tuyến.",
+                resources: [
+                    {
+                        id: "r3_1",
+                        type: "SLIDE",
+                        title: "Slide tóm tắt Chuyên đề 3: Mô hình TCP/IP, DNS & Cloud",
+                        source: "Học liệu chuẩn CNTT 4.0",
+                        url: "",
+                        desc: "Bảng đối chiếu mô hình OSI 7 tầng và TCP/IP 4 tầng, phân loại dịch vụ đám mây IaaS/PaaS/SaaS.",
+                        previewText: "NỘI DUNG SLIDE CHUYÊN ĐỀ 3:\n1. TCP/IP 4 tầng: Application -> Transport -> Internet -> Network Access.\n2. IPv4 (32-bit, ~4.3 tỷ địa chỉ) vs IPv6 (128-bit, không gian địa chỉ gần như vô hạn).\n3. Cloud Models: SaaS (Người dùng cuối) | PaaS (Nhà phát triển) | IaaS (Quản trị hạ tầng)."
+                    },
+                    {
+                        id: "r3_2",
+                        type: "LINK",
+                        title: "W3C - Web Standards & Architecture",
+                        source: "World Wide Web Consortium",
+                        url: "https://www.w3.org/standards/",
+                        desc: "Tổ chức tiêu chuẩn hóa Web quốc tế về giao thức, khả năng truy cập và kiến trúc Internet."
+                    }
+                ]
+            },
+            {
+                id: 4,
+                shortTitle: "Dữ liệu, CSDL & Big Data",
+                title: "Chuyên đề 4: Dữ liệu, Cơ sở dữ liệu & Dữ liệu lớn (Big Data)",
+                subtitle: "Hiểu giá trị của dữ liệu trong kỷ nguyên số: từ dữ liệu có cấu trúc/phi cấu trúc, hệ quản trị CSDL SQL & NoSQL đến đặc trưng 5V của Big Data.",
+                objectives: [
+                    "Phân biệt được dữ liệu có cấu trúc, bán cấu trúc và phi cấu trúc.",
+                    "So sánh đặc điểm và tình huống ứng dụng của CSDL quan hệ (SQL) và phi quan hệ (NoSQL).",
+                    "Trình bày được 5 đặc trưng (5V) của Dữ liệu lớn và chu trình phân tích dữ liệu."
+                ],
+                svgCaption: "Hình 4.1: Chu trình Xử lý Dữ liệu & Đặc trưng 5V của Dữ liệu lớn (Big Data)",
+                svgMarkup: `
+                    <svg viewBox="0 0 760 250" class="w-full max-w-3xl h-auto" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <marker id="arrow4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M 0 1 L 10 5 L 0 9 z" fill="#0056D2"/>
+                            </marker>
+                        </defs>
+                        <!-- Pipeline Steps -->
+                        <rect x="20" y="30" width="155" height="76" rx="12" fill="#EFF6FF" stroke="#0056D2" stroke-width="2"/>
+                        <text x="97" y="62" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#1E3A8A">1. THU THẬP</text>
+                        <text x="97" y="80" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#475569">IoT, Web, Giao dịch, Log</text>
+
+                        <rect x="205" y="30" width="165" height="76" rx="12" fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
+                        <text x="287" y="62" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#166534">2. LƯU TRỮ & LÀM SẠCH</text>
+                        <text x="287" y="80" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#15803D">SQL • NoSQL • Data Lake</text>
+
+                        <rect x="400" y="30" width="165" height="76" rx="12" fill="#FEF3C7" stroke="#D97706" stroke-width="2"/>
+                        <text x="482" y="62" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#92400E">3. PHÂN TÍCH & AI</text>
+                        <text x="482" y="80" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#78350F">Khai phá mẫu & Dự báo</text>
+
+                        <rect x="595" y="30" width="145" height="76" rx="12" fill="#0056D2"/>
+                        <text x="667" y="62" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#FFFFFF">4. RA QUYẾT ĐỊNH</text>
+                        <text x="667" y="80" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#DBEAFE">Dashboard & Tự động hóa</text>
+
+                        <line x1="175" y1="68" x2="199" y2="68" stroke="#0056D2" stroke-width="2" marker-end="url(#arrow4)"/>
+                        <line x1="370" y1="68" x2="394" y2="68" stroke="#0056D2" stroke-width="2" marker-end="url(#arrow4)"/>
+                        <line x1="565" y1="68" x2="589" y2="68" stroke="#0056D2" stroke-width="2" marker-end="url(#arrow4)"/>
+
+                        <!-- 5V Banner -->
+                        <rect x="20" y="135" width="720" height="92" rx="14" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5"/>
+                        <text x="380" y="158" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#0F172A">5 ĐẶC TRƯNG CỐT LÕI CỦA DỮ LIỆU LỚN (BIG DATA 5V)</text>
+                        
+                        <g font-family="Inter, sans-serif" font-size="11" text-anchor="middle">
+                            <rect x="38" y="172" width="125" height="42" rx="8" fill="#FFFFFF" stroke="#93C5FD"/>
+                            <text x="100" y="190" font-weight="700" fill="#1D4ED8">Volume</text>
+                            <text x="100" y="205" font-size="10" fill="#475569">Khối lượng khổng lồ</text>
+
+                            <rect x="177" y="172" width="125" height="42" rx="8" fill="#FFFFFF" stroke="#93C5FD"/>
+                            <text x="239" y="190" font-weight="700" fill="#1D4ED8">Velocity</text>
+                            <text x="239" y="205" font-size="10" fill="#475569">Tốc độ sinh thời gian thực</text>
+
+                            <rect x="316" y="172" width="125" height="42" rx="8" fill="#FFFFFF" stroke="#93C5FD"/>
+                            <text x="378" y="190" font-weight="700" fill="#1D4ED8">Variety</text>
+                            <text x="378" y="205" font-size="10" fill="#475569">Đa dạng định dạng</text>
+
+                            <rect x="455" y="172" width="125" height="42" rx="8" fill="#FFFFFF" stroke="#93C5FD"/>
+                            <text x="517" y="190" font-weight="700" fill="#1D4ED8">Veracity</text>
+                            <text x="517" y="205" font-size="10" fill="#475569">Độ tin cậy & chính xác</text>
+
+                            <rect x="594" y="172" width="128" height="42" rx="8" fill="#EFF6FF" stroke="#0056D2"/>
+                            <text x="658" y="190" font-weight="700" fill="#0056D2">Value</text>
+                            <text x="658" y="205" font-size="10" fill="#1E3A8A">Giá trị tri thức tạo ra</text>
+                        </g>
+                    </svg>
+                `,
+                theoryBlocks: [
+                    {
+                        heading: "1. Phân loại Dữ liệu Số",
+                        content: "<strong>Dữ liệu có cấu trúc:</strong> Tổ chức theo bảng hàng và cột cố định (bảng điểm sinh viên, giao dịch ngân hàng). <strong>Dữ liệu bán cấu trúc:</strong> Có thẻ định danh nhưng không gò bó bảng cứng (JSON, XML). <strong>Dữ liệu phi cấu trúc:</strong> Chiếm hơn 80% dữ liệu toàn cầu gồm văn bản tự do, hình ảnh, video, âm thanh."
+                    },
+                    {
+                        heading: "2. Cơ sở dữ liệu Quan hệ (SQL) vs. Phi quan hệ (NoSQL)",
+                        content: "<strong>SQL (PostgreSQL, MySQL, SQL Server):</strong> Lưu trữ dạng bảng liên kết, đảm bảo tính toàn vẹn giao dịch chặt chẽ (ACID). <strong>NoSQL (MongoDB, Redis, Cassandra):</strong> Lưu dạng tài liệu (Document), cặp khóa-giá trị (Key-Value) hoặc đồ thị (Graph), dễ mở rộng ngang cho dữ liệu lớn."
+                    },
+                    {
+                        heading: "3. Dữ liệu lớn (Big Data 5V)",
+                        content: "Big Data vượt quá khả năng xử lý của công cụ truyền thống với 5 chữ V: <strong>Volume</strong> (Khối lượng), <strong>Velocity</strong> (Tốc độ), <strong>Variety</strong> (Đa dạng), <strong>Veracity</strong> (Độ xác thực) và <strong>Value</strong> (Giá trị khai thác)."
+                    }
+                ],
+                example: "Hệ thống thương mại điện tử dùng CSDL SQL để đảm bảo số dư thanh toán và tồn kho chính xác tuyệt đối, đồng thời dùng Big Data & NoSQL để phân tích hàng triệu lượt nhấp chuột nhằm gợi ý sản phẩm theo thời gian thực.",
+                keyTakeaway: "Dữ liệu được ví như 'dầu mỏ mới' của nền kinh tế số, nhưng chỉ thực sự tạo ra giá trị khi được làm sạch (Veracity) và phân tích đúng mục tiêu.",
+                youtubeId: "bAyrObl7TYE",
+                youtubeUrl: "https://www.youtube.com/watch?v=bAyrObl7TYE",
+                videoDesc: "Giải thích khái niệm Big Data, cách thu thập và biến dữ liệu khổng lồ thành tri thức hữu ích.",
+                resources: [
+                    {
+                        id: "r4_1",
+                        type: "SLIDE",
+                        title: "Slide tóm tắt Chuyên đề 4: SQL, NoSQL & Big Data 5V",
+                        source: "Học liệu chuẩn CNTT 4.0",
+                        url: "",
+                        desc: "Bảng so sánh SQL và NoSQL cùng quy trình ETL (Extract - Transform - Load).",
+                        previewText: "NỘI DUNG SLIDE CHUYÊN ĐỀ 4:\n1. Tháp tri thức DIKW: Data (Dữ liệu) -> Information (Thông tin) -> Knowledge (Tri thức) -> Wisdom (Trí tuệ).\n2. SQL vs NoSQL: SQL mạnh về cấu trúc & toàn vẹn; NoSQL mạnh về tốc độ & dữ liệu phi cấu trúc.\n3. Nguyên tắc Garbage In, Garbage Out: Dữ liệu đầu vào sai lệch sẽ dẫn đến phân tích sai."
+                    },
+                    {
+                        id: "r4_2",
+                        type: "LINK",
+                        title: "Coursera - Data Science & Big Data Foundations",
+                        source: "Coursera",
+                        url: "https://www.coursera.org/browse/data-science",
+                        desc: "Tổng hợp học liệu chuẩn về khoa học dữ liệu, phân tích thống kê và hệ quản trị CSDL."
+                    }
+                ]
+            },
+            {
+                id: 5,
+                shortTitle: "AI, Học máy & Prompt",
+                title: "Chuyên đề 5: Trí tuệ Nhân tạo (AI), Học máy & Tự động hóa",
+                subtitle: "Phân biệt hệ sinh thái AI, Machine Learning, Deep Learning, AI tạo sinh (Generative AI) và kỹ thuật viết câu lệnh Prompt Engineering hiệu quả.",
+                objectives: [
+                    "Phân biệt rõ mối quan hệ bao hàm giữa AI, Machine Learning (ML), Deep Learning (DL) và Generative AI.",
+                    "Hiểu cách mô hình AI học từ dữ liệu huấn luyện và nhận diện rủi ro ảo giác (Hallucination).",
+                    "Áp dụng được khung viết câu lệnh Prompt 5 yếu tố để khai thác trợ lý AI trong học tập."
+                ],
+                svgCaption: "Hình 5.1: Hệ sinh thái Trí tuệ Nhân tạo (AI → ML → DL → Generative AI) & Khung Prompting",
+                svgMarkup: `
+                    <svg viewBox="0 0 760 265" class="w-full max-w-3xl h-auto" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Concentric Circles on Left -->
+                        <circle cx="195" cy="132" r="120" fill="#EFF6FF" stroke="#0056D2" stroke-width="2"/>
+                        <text x="195" y="34" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="11" fill="#1E3A8A">ARTIFICIAL INTELLIGENCE (AI)</text>
+
+                        <circle cx="195" cy="146" r="92" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.8"/>
+                        <text x="195" y="75" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="11" fill="#1D4ED8">MACHINE LEARNING (ML)</text>
+
+                        <circle cx="195" cy="160" r="64" fill="#BFDBFE" stroke="#1D4ED8" stroke-width="1.8"/>
+                        <text x="195" y="117" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="10" fill="#1E3A8A">DEEP LEARNING (DL)</text>
+
+                        <circle cx="195" cy="176" r="38" fill="#0056D2"/>
+                        <text x="195" y="173" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="10" fill="#FFFFFF">GEN AI</text>
+                        <text x="195" y="187" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#DBEAFE">LLM / Diffusion</text>
+
+                        <!-- Prompt Engineering Framework on Right -->
+                        <rect x="355" y="18" width="385" height="228" rx="16" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.8"/>
+                        <text x="547" y="44" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#0F172A">CÔNG THỨC VIẾT PROMPT HIỆU QUẢ (5 BƯỚC)</text>
+
+                        <g font-family="Inter, sans-serif" font-size="11">
+                            <rect x="375" y="58" width="345" height="30" rx="8" fill="#FFFFFF" stroke="#93C5FD"/>
+                            <text x="388" y="77" font-weight="700" fill="#0056D2">1. Vai trò (Role):</text>
+                            <text x="488" y="77" fill="#334155">Gia sư, chuyên gia phân tích, biên tập viên</text>
+
+                            <rect x="375" y="95" width="345" height="30" rx="8" fill="#FFFFFF" stroke="#93C5FD"/>
+                            <text x="388" y="114" font-weight="700" fill="#0056D2">2. Nhiệm vụ (Task):</text>
+                            <text x="505" y="114" fill="#334155">Tóm tắt, so sánh, giải thích, tạo câu hỏi</text>
+
+                            <rect x="375" y="132" width="345" height="30" rx="8" fill="#FFFFFF" stroke="#93C5FD"/>
+                            <text x="388" y="151" font-weight="700" fill="#0056D2">3. Bối cảnh & Nguồn:</text>
+                            <text x="515" y="151" fill="#334155">Môn học, đối tượng, tài liệu đính kèm</text>
+
+                            <rect x="375" y="169" width="345" height="30" rx="8" fill="#FFFFFF" stroke="#93C5FD"/>
+                            <text x="388" y="188" font-weight="700" fill="#0056D2">4. Định dạng (Format):</text>
+                            <text x="515" y="188" fill="#334155">Bảng, gạch đầu dòng, giới hạn số từ</text>
+
+                            <rect x="375" y="206" width="345" height="30" rx="8" fill="#FEF3C7" stroke="#F59E0B"/>
+                            <text x="388" y="225" font-weight="700" fill="#92400E">5. Kiểm chứng:</text>
+                            <text x="482" y="225" fill="#78350F">Trích dẫn nguồn gốc & đối chiếu thực tế</text>
+                        </g>
+                    </svg>
+                `,
+                theoryBlocks: [
+                    {
+                        heading: "1. Phân biệt AI, Machine Learning và Deep Learning",
+                        content: "<strong>AI (Trí tuệ nhân tạo):</strong> Khái niệm bao trùm về máy móc thực hiện nhiệm vụ thông minh. <strong>Machine Learning (Học máy):</strong> Máy tự tìm quy luật từ dữ liệu thay vì lập trình cứng từng luật. <strong>Deep Learning (Học sâu):</strong> Dùng mạng nơ-ron nhân tạo nhiều lớp mô phỏng não bộ để nhận diện hình ảnh, giọng nói và ngôn ngữ tự nhiên (NLP)."
+                    },
+                    {
+                        heading: "2. AI Tạo sinh (Generative AI) & Mô hình Ngôn ngữ Lớn (LLM)",
+                        content: "Các mô hình như Gemini, ChatGPT hay NotebookLM có khả năng tạo văn bản, mã nguồn, hình ảnh mới dựa trên xác suất ngữ cảnh đã học. Tuy nhiên, AI có thể gặp hiện tượng <strong>ảo giác (Hallucination)</strong> — tạo ra thông tin nghe có vẻ hợp lý nhưng sai sự thật."
+                    },
+                    {
+                        heading: "3. Kỹ thuật Viết Câu lệnh (Prompt Engineering)",
+                        content: "Chất lượng câu trả lời của AI phụ thuộc trực tiếp vào độ rõ ràng của Prompt. Một câu lệnh chuẩn cần chỉ rõ: <em>Vai trò của AI + Nhiệm vụ cụ thể + Bối cảnh/Tài liệu nguồn + Định dạng đầu ra + Yêu cầu trích dẫn & kiểm chứng</em>."
+                    }
+                ],
+                example: "Thay vì hỏi chung chung 'Giải thích về AI', sinh viên viết: 'Đóng vai giảng viên CNTT, hãy so sánh Machine Learning và Deep Learning dưới dạng bảng 3 tiêu chí cho sinh viên năm nhất, kèm 1 ví dụ đời sống cho mỗi loại.'",
+                keyTakeaway: "AI là trợ lý tăng tốc tư duy và tổng hợp tài liệu (như NotebookLM), nhưng con người luôn giữ vai trò kiểm chứng cuối cùng và chịu trách nhiệm học thuật.",
+                youtubeId: "ad79nYk2keg",
+                youtubeUrl: "https://www.youtube.com/watch?v=ad79nYk2keg",
+                videoDesc: "Tổng quan dễ hiểu về Trí tuệ nhân tạo, Học máy, Học sâu và các ứng dụng trong kỷ nguyên số.",
+                resources: [
+                    {
+                        id: "r5_1",
+                        type: "SLIDE",
+                        title: "Slide tóm tắt Chuyên đề 5: AI, Học máy & Kỹ thuật Prompt",
+                        source: "Học liệu chuẩn CNTT 4.0",
+                        url: "",
+                        desc: "Sơ đồ phân tầng AI/ML/DL, quy trình huấn luyện dữ liệu và mẫu Prompt 5 bước.",
+                        previewText: "NỘI DUNG SLIDE CHUYÊN ĐỀ 5:\n1. AI vs Robot: AI là phần mềm/thuật toán thông minh; Robot là thiết bị cơ khí vật lý.\n2. Quy trình học máy: Thu thập dữ liệu -> Làm sạch -> Huấn luyện -> Đánh giá -> Triển khai.\n3. Nguyên tắc vàng: Không đưa dữ liệu mật lên AI công cộng; luôn kiểm chứng trích dẫn."
+                    },
+                    {
+                        id: "r5_2",
+                        type: "LINK",
+                        title: "Google NotebookLM - Trợ lý nghiên cứu dựa trên tài liệu nguồn",
+                        source: "Google",
+                        url: "https://notebooklm.google.com",
+                        desc: "Công cụ khai thác slide, PDF và ghi chú cá nhân có trích dẫn chính xác vị trí nguồn."
+                    }
+                ]
+            },
+            {
+                id: 6,
+                shortTitle: "Công nghệ Lõi Số 4.0",
+                title: "Chuyên đề 6: Công nghệ Lõi Kỷ nguyên Số 4.0",
+                subtitle: "Khám phá các trụ cột công nghệ kết nối thế giới vật lý và thế giới số: Internet vạn vật (IoT), Blockchain, Điện toán biên (Edge Computing) và Digital Twin.",
+                objectives: [
+                    "Hiểu kiến trúc 3 lớp của hệ thống Internet vạn vật (IoT) và vai trò của Điện toán biên.",
+                    "Giải thích được nguyên lý sổ cái phân tán, tính bất biến và hợp đồng thông minh của Blockchain.",
+                    "Nhận diện ứng dụng của Bản sao số (Digital Twin) và Thực tế mở rộng (AR/VR/Metaverse)."
+                ],
+                svgCaption: "Hình 6.1: Hệ sinh thái Công nghệ Lõi Cách mạng Công nghiệp 4.0",
+                svgMarkup: `
+                    <svg viewBox="0 0 760 250" class="w-full max-w-3xl h-auto" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Center Hub -->
+                        <rect x="285" y="88" width="190" height="74" rx="16" fill="#0056D2"/>
+                        <text x="380" y="120" text-anchor="middle" font-family="Inter, sans-serif" font-weight="800" font-size="13" fill="#FFFFFF">HỆ SINH THÁI SỐ 4.0</text>
+                        <text x="380" y="139" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#DBEAFE">Hội tụ Vật lý – Số – Sinh học</text>
+
+                        <!-- Node 1: IoT & Edge -->
+                        <rect x="25" y="22" width="215" height="82" rx="12" fill="#EFF6FF" stroke="#0056D2" stroke-width="2"/>
+                        <text x="132" y="48" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#1E3A8A">IoT & Điện toán biên (Edge)</text>
+                        <text x="132" y="66" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#475569">Cảm biến thu thập dữ liệu &</text>
+                        <text x="132" y="81" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#475569">xử lý tại chỗ độ trễ cực thấp</text>
+
+                        <!-- Node 2: Blockchain -->
+                        <rect x="520" y="22" width="215" height="82" rx="12" fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
+                        <text x="627" y="48" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#166534">Chuỗi khối (Blockchain)</text>
+                        <text x="627" y="66" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#15803D">Sổ cái phân tán, bất biến,</text>
+                        <text x="627" y="81" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#15803D">minh bạch & Smart Contract</text>
+
+                        <!-- Node 3: Digital Twin -->
+                        <rect x="25" y="146" width="215" height="82" rx="12" fill="#FEF3C7" stroke="#D97706" stroke-width="2"/>
+                        <text x="132" y="172" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#92400E">Bản sao số (Digital Twin)</text>
+                        <text x="132" y="190" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#78350F">Mô phỏng 3D thời gian thực</text>
+                        <text x="132" y="205" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#78350F">nhà máy, đô thị & y tế</text>
+
+                        <!-- Node 4: AR/VR/Metaverse -->
+                        <rect x="520" y="146" width="215" height="82" rx="12" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+                        <text x="627" y="172" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#5B21B6">Thực tế mở rộng (XR)</text>
+                        <text x="627" y="190" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#6D28D9">AR, VR & Không gian tương tác</text>
+                        <text x="627" y="205" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#6D28D9">ảo đào tạo & mô phỏng</text>
+
+                        <!-- Connector Lines -->
+                        <line x1="240" y1="68" x2="285" y2="105" stroke="#0056D2" stroke-width="2"/>
+                        <line x1="520" y1="68" x2="475" y2="105" stroke="#16A34A" stroke-width="2"/>
+                        <line x1="240" y1="182" x2="285" y2="145" stroke="#D97706" stroke-width="2"/>
+                        <line x1="520" y1="182" x2="475" y2="145" stroke="#7C3AED" stroke-width="2"/>
+                    </svg>
+                `,
+                theoryBlocks: [
+                    {
+                        heading: "1. Internet vạn vật (IoT) & Điện toán biên (Edge Computing)",
+                        content: "<strong>IoT</strong> kết nối hàng tỷ thiết bị vật lý gắn cảm biến (nhà thông minh, nông nghiệp chính xác, thiết bị đeo y tế) qua Internet. Thay vì gửi toàn bộ dữ liệu thô về đám mây gây trễ, <strong>Điện toán biên (Edge)</strong> xử lý dữ liệu ngay tại thiết bị hoặc trạm gần nguồn phát."
+                    },
+                    {
+                        heading: "2. Chuỗi khối (Blockchain)",
+                        content: "Blockchain là cơ sở dữ liệu phân tán lưu trữ thông tin theo từng khối (Block) liên kết mật mã với nhau. Đặc tính nổi bật là <strong>phi tập trung, minh bạch và không thể sửa đổi ngược (bất biến)</strong>, ứng dụng mạnh trong truy xuất nguồn gốc nông sản, chứng chỉ số và tài chính."
+                    },
+                    {
+                        heading: "3. Bản sao số (Digital Twin) & Thực tế mở rộng (AR/VR)",
+                        content: "<strong>Digital Twin</strong> tạo ra bản sao ảo cập nhật dữ liệu thời gian thực từ đối tượng vật lý để thử nghiệm và dự báo bảo trì. <strong>AR (Thực tế tăng cường)</strong> phủ thông tin số lên thế giới thật, trong khi <strong>VR (Thực tế ảo)</strong> đưa người dùng vào môi trường mô phỏng 3D hoàn toàn."
+                    }
+                ],
+                example: "Trong một nhà máy thông minh 4.0, cảm biến IoT đo độ rung động cơ và xử lý tức thì qua Edge Computing; dữ liệu được đồng bộ lên Digital Twin để kỹ sư quan sát qua kính AR và dự đoán hỏng hóc trước khi máy ngừng hoạt động.",
+                keyTakeaway: "Sức mạnh của Công nghệ 4.0 không nằm ở từng công nghệ đơn lẻ mà ở sự kết hợp: IoT thu thập dữ liệu, Cloud/Edge xử lý, AI phân tích và Blockchain bảo chứng độ tin cậy.",
+                youtubeId: "LlhmzVL5bm8",
+                youtubeUrl: "https://www.youtube.com/watch?v=LlhmzVL5bm8",
+                videoDesc: "Giải thích trực quan cách Internet of Things (IoT) kết nối thiết bị thông minh trong đời sống và sản xuất.",
+                resources: [
+                    {
+                        id: "r6_1",
+                        type: "SLIDE",
+                        title: "Slide tóm tắt Chuyên đề 6: IoT, Blockchain, Edge & Digital Twin",
+                        source: "Học liệu chuẩn CNTT 4.0",
+                        url: "",
+                        desc: "Tổng hợp kiến trúc 3 tầng IoT và các ứng dụng tiêu biểu của công nghệ lõi 4.0.",
+                        previewText: "NỘI DUNG SLIDE CHUYÊN ĐỀ 6:\n1. Kiến trúc IoT: Tầng Cảm nhận (Sensors) -> Tầng Mạng (5G/Wi-Fi/LoRa) -> Tầng Ứng dụng.\n2. Edge Computing: Giảm độ trễ, tiết kiệm băng thông, tăng tính riêng tư dữ liệu.\n3. Blockchain: Mỗi khối chứa Dữ liệu + Mã băm (Hash) hiện tại + Mã băm của khối trước đó."
+                    },
+                    {
+                        id: "r6_2",
+                        type: "LINK",
+                        title: "World Economic Forum - Fourth Industrial Revolution",
+                        source: "WEF",
+                        url: "https://www.weforum.org/focus/fourth-industrial-revolution/",
+                        desc: "Báo cáo phân tích xu hướng công nghệ lõi của Cách mạng Công nghiệp lần thứ tư."
+                    }
+                ]
+            },
+            {
+                id: 7,
+                shortTitle: "An toàn Thông tin & Bảo mật",
+                title: "Chuyên đề 7: An toàn Thông tin & An ninh Mạng",
+                subtitle: "Bảo vệ tài sản số theo bộ ba CIA Triad, nhận diện tấn công lừa đảo Phishing/Malware, cơ chế mã hóa dữ liệu và xác thực đa yếu tố (MFA).",
+                objectives: [
+                    "Phân tích được 3 trụ cột an toàn thông tin: Bí mật (Confidentiality), Toàn vẹn (Integrity) và Sẵn sàng (Availability).",
+                    "Nhận diện được các hình thức tấn công phổ biến: Phishing, Ransomware, Social Engineering.",
+                    "Thực hành thiết lập mật khẩu mạnh, trình quản lý mật khẩu, xác thực đa yếu tố (MFA) và sao lưu 3-2-1."
+                ],
+                svgCaption: "Hình 7.1: Bộ ba An toàn Thông tin (CIA Triad) & Lá chắn Phòng vệ Cá nhân",
+                svgMarkup: `
+                    <svg viewBox="0 0 760 250" class="w-full max-w-3xl h-auto" xmlns="http://www.w3.org/2000/svg">
+                        <!-- CIA Triangle -->
+                        <polygon points="185,28 45,215 325,215" fill="#EFF6FF" stroke="#0056D2" stroke-width="2.5"/>
+                        <circle cx="185" cy="148" r="34" fill="#0056D2"/>
+                        <text x="185" y="145" text-anchor="middle" font-family="Inter, sans-serif" font-weight="800" font-size="11" fill="#FFFFFF">CIA</text>
+                        <text x="185" y="159" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#DBEAFE">TRIAD</text>
+
+                        <rect x="115" y="14" width="140" height="32" rx="8" fill="#1E3A8A"/>
+                        <text x="185" y="34" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="11" fill="#FFFFFF">Bí mật (Confidentiality)</text>
+
+                        <rect x="12" y="198" width="145" height="34" rx="8" fill="#047857"/>
+                        <text x="84" y="219" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="11" fill="#FFFFFF">Toàn vẹn (Integrity)</text>
+
+                        <rect x="215" y="198" width="148" height="34" rx="8" fill="#B45309"/>
+                        <text x="289" y="219" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="11" fill="#FFFFFF">Sẵn sàng (Availability)</text>
+
+                        <!-- Defense Layers Right -->
+                        <rect x="385" y="22" width="355" height="208" rx="16" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.8"/>
+                        <text x="562" y="48" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#0F172A">4 LỚP PHÒNG VỆ AN NINH SỐ CÁ NHÂN</text>
+
+                        <g font-family="Inter, sans-serif" font-size="11">
+                            <rect x="405" y="62" width="315" height="34" rx="8" fill="#FFFFFF" stroke="#93C5FD"/>
+                            <text x="418" y="83" font-weight="700" fill="#0056D2">1. Xác thực đa yếu tố (MFA):</text>
+                            <text x="580" y="83" fill="#334155">Mật khẩu + OTP / App / Sinh trắc</text>
+
+                            <rect x="405" y="103" width="315" height="34" rx="8" fill="#FFFFFF" stroke="#93C5FD"/>
+                            <text x="418" y="124" font-weight="700" fill="#0056D2">2. Mã hóa (Encryption):</text>
+                            <text x="550" y="124" fill="#334155">HTTPS, VPN, mã hóa ổ đĩa</text>
+
+                            <rect x="405" y="144" width="315" height="34" rx="8" fill="#FFFFFF" stroke="#93C5FD"/>
+                            <text x="418" y="165" font-weight="700" fill="#0056D2">3. Chống Phishing:</text>
+                            <text x="530" y="165" fill="#334155">Kiểm tra kỹ tên miền & tệp lạ</text>
+
+                            <rect x="405" y="185" width="315" height="34" rx="8" fill="#ECFDF5" stroke="#10B981"/>
+                            <text x="418" y="206" font-weight="700" fill="#065F46">4. Sao lưu 3-2-1:</text>
+                            <text x="515" y="206" fill="#047857">3 bản sao • 2 thiết bị • 1 ngoại tuyến</text>
+                        </g>
+                    </svg>
+                `,
+                theoryBlocks: [
+                    {
+                        heading: "1. Mô hình CIA Triad trong An toàn Thông tin",
+                        content: "<strong>Confidentiality (Tính bí mật):</strong> Chỉ người được cấp quyền mới xem được dữ liệu (bảo vệ bằng mã hóa, phân quyền). <strong>Integrity (Tính toàn vẹn):</strong> Dữ liệu không bị sửa đổi trái phép trên đường truyền (kiểm tra bằng hàm băm Hash). <strong>Availability (Tính sẵn sàng):</strong> Hệ thống luôn hoạt động ổn định khi người dùng hợp pháp cần truy cập."
+                    },
+                    {
+                        heading: "2. Các mối đe dọa Phổ biến trên Không gian mạng",
+                        content: "<strong>Phishing (Tấn công giả mạo):</strong> Giả danh ngân hàng, nhà trường hoặc dịch vụ để đánh cắp mật khẩu/mã OTP. <strong>Malware & Ransomware:</strong> Phần mềm độc hại mã hóa toàn bộ dữ liệu trên máy để đòi tiền chuộc. <strong>Social Engineering:</strong> Thao túng tâm lý con người để khai thác thông tin nhạy cảm."
+                    },
+                    {
+                        heading: "3. Biện pháp Phòng vệ Thiết yếu",
+                        content: "Sử dụng mật khẩu dài tối thiểu 12 ký tự (không dùng chung giữa các dịch vụ), bật <strong>Xác thực đa yếu tố (MFA/2FA)</strong> qua ứng dụng Authenticator, cập nhật bản vá hệ điều hành định kỳ và thực hiện quy tắc sao lưu dữ liệu <strong>3-2-1</strong>."
+                    }
+                ],
+                example: "Nếu nhận được email yêu cầu 'Xác minh tài khoản sinh viên khẩn cấp' qua một đường link lạ có tên miền sai chính tả (ví dụ: <code>universtiy-login.com</code>), đó là dấu hiệu điển hình của tấn công Phishing — tuyệt đối không nhấp vào hoặc nhập mật khẩu.",
+                keyTakeaway: "Con người thường là mắt xích yếu nhất trong chuỗi an ninh mạng; bật xác thực đa yếu tố (MFA) giúp ngăn chặn hơn 99% các cuộc tấn công chiếm đoạt tài khoản tự động.",
+                youtubeId: "inWWhr5tnEA",
+                youtubeUrl: "https://www.youtube.com/watch?v=inWWhr5tnEA",
+                videoDesc: "Giới thiệu tổng quan về An ninh mạng, các hình thức tấn công phổ biến và cách bảo vệ dữ liệu cá nhân.",
+                resources: [
+                    {
+                        id: "r7_1",
+                        type: "SLIDE",
+                        title: "Slide tóm tắt Chuyên đề 7: CIA Triad, Mã hóa & Phòng chống Phishing",
+                        source: "Học liệu chuẩn CNTT 4.0",
+                        url: "",
+                        desc: "Hướng dẫn thiết lập MFA, nhận diện email giả mạo và quy tắc sao lưu 3-2-1.",
+                        previewText: "NỘI DUNG SLIDE CHUYÊN ĐỀ 7:\n1. CIA Triad: Confidentiality (Bí mật) - Integrity (Toàn vẹn) - Availability (Sẵn sàng).\n2. Mã hóa đối xứng (1 khóa chung - AES) vs Bất đối xứng (Khóa công khai & Khóa bí mật - RSA).\n3. Quy tắc Backup 3-2-1: 3 bản dữ liệu, lưu trên 2 loại phương tiện khác nhau, có 1 bản lưu tách biệt (Cloud/ổ cứng rời)."
+                    },
+                    {
+                        id: "r7_2",
+                        type: "LINK",
+                        title: "NIST Cybersecurity Framework",
+                        source: "NIST (Viện Tiêu chuẩn & Công nghệ Quốc gia Hoa Kỳ)",
+                        url: "https://www.nist.gov/cyberframework",
+                        desc: "Khung tiêu chuẩn quốc tế về quản trị rủi ro và bảo vệ an ninh mạng."
+                    }
+                ]
+            },
+            {
+                id: 8,
+                shortTitle: "Đạo đức & Công dân Số",
+                title: "Chuyên đề 8: Đạo đức Số, Chuyển đổi Số & Kỹ năng Công dân Số",
+                subtitle: "Hoàn thiện năng lực công dân thời đại 4.0: quản trị dấu chân số, tôn trọng bản quyền trí tuệ, liêm chính học thuật với AI và tiến trình Chuyển đổi số.",
+                objectives: [
+                    "Hiểu khái niệm Dấu chân số (Digital Footprint) và trách nhiệm ứng xử văn minh trên không gian mạng.",
+                    "Phân biệt được bản quyền truyền thống và giấy phép mở Creative Commons (CC) trong khai thác học liệu.",
+                    "Nắm được 3 trụ cột của Chuyển đổi số quốc gia: Chính phủ số, Kinh tế số và Xã hội số."
+                ],
+                svgCaption: "Hình 8.1: 3 Trụ cột Chuyển đổi Số & Năng lực Công dân Số Có Trách nhiệm",
+                svgMarkup: `
+                    <svg viewBox="0 0 760 250" class="w-full max-w-3xl h-auto" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Top Roof: National Digital Transformation -->
+                        <polygon points="380,18 60,72 700,72" fill="#0056D2"/>
+                        <text x="380" y="55" text-anchor="middle" font-family="Inter, sans-serif" font-weight="800" font-size="13" fill="#FFFFFF">CHUYỂN ĐỔI SỐ TOÀN DIỆN (DIGITAL TRANSFORMATION)</text>
+
+                        <!-- 3 Pillars -->
+                        <rect x="85" y="84" width="175" height="92" rx="12" fill="#EFF6FF" stroke="#0056D2" stroke-width="2"/>
+                        <text x="172" y="112" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#1E3A8A">1. CHÍNH PHỦ SỐ</text>
+                        <text x="172" y="132" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#475569">Dịch vụ công trực tuyến,</text>
+                        <text x="172" y="147" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#475569">định danh điện tử VNeID,</text>
+                        <text x="172" y="162" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#475569">quản trị dựa trên dữ liệu</text>
+
+                        <rect x="292" y="84" width="175" height="92" rx="12" fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
+                        <text x="379" y="112" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#166534">2. KINH TẾ SỐ</text>
+                        <text x="379" y="132" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#15803D">Thương mại điện tử,</text>
+                        <text x="379" y="147" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#15803D">thanh toán không tiền mặt,</text>
+                        <text x="379" y="162" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#15803D">doanh nghiệp công nghệ số</text>
+
+                        <rect x="500" y="84" width="175" height="92" rx="12" fill="#FEF3C7" stroke="#D97706" stroke-width="2"/>
+                        <text x="587" y="112" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#92400E">3. XÃ HỘI SỐ</text>
+                        <text x="587" y="132" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#78350F">Giáo dục số, Y tế số,</text>
+                        <text x="587" y="147" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#78350F">thu hẹp khoảng cách số,</text>
+                        <text x="587" y="162" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#78350F">văn hóa ứng xử văn minh</text>
+
+                        <!-- Foundation: Digital Citizenship -->
+                        <rect x="60" y="188" width="640" height="46" rx="12" fill="#1E293B"/>
+                        <text x="380" y="209" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="12" fill="#FFFFFF">NỀN TẢNG: ĐẠO ĐỨC SỐ & CÔNG DÂN SỐ CÓ TRÁCH NHIỆM</text>
+                        <text x="380" y="225" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#CBD5E1">Quản trị Dấu chân số • Tôn trọng Bản quyền (Creative Commons) • Liêm chính học thuật khi dùng AI</text>
+                    </svg>
+                `,
+                theoryBlocks: [
+                    {
+                        heading: "1. Dấu chân số (Digital Footprint) & Văn hóa Ứng xử Mạng",
+                        content: "Mọi bình luận, lượt chia sẻ, hình ảnh đăng tải hay lịch sử truy cập đều tạo thành <strong>Dấu chân số</strong> tồn tại lâu dài và có thể ảnh hưởng đến uy tín học tập, nghề nghiệp sau này. Công dân số văn minh luôn kiểm chứng nguồn tin trước khi chia sẻ để chống tin giả (Fake News)."
+                    },
+                    {
+                        heading: "2. Bản quyền Số, Giấy phép Mở & Liêm chính Học thuật",
+                        content: "Khi thu thập hình ảnh, video hoặc tài liệu vào thư viện cá nhân, cần tôn trọng luật Sở hữu trí tuệ và trích dẫn nguồn rõ ràng. Hệ thống giấy phép <strong>Creative Commons (CC-BY, CC-NC...)</strong> cho phép chia sẻ học liệu mở hợp pháp. Trong học tập, tuyệt đối không sao chép nguyên văn nội dung AI tạo ra để nộp thành bài làm của bản thân."
+                    },
+                    {
+                        heading: "3. Chuyển đổi Số (Digital Transformation) vs. Số hóa (Digitization)",
+                        content: "<strong>Số hóa</strong> chỉ là chuyển tài liệu giấy sang dạng tệp kỹ thuật số. <strong>Chuyển đổi số</strong> là thay đổi toàn diện phương thức vận hành, học tập và quản trị dựa trên dữ liệu và công nghệ số trên 3 trụ cột: <em>Chính phủ số, Kinh tế số và Xã hội số</em>."
+                    }
+                ],
+                example: "Khi làm tiểu luận nhóm, sinh viên sử dụng công cụ AI để gợi ý dàn ý và tìm từ khóa nghiên cứu, sau đó tự đọc giáo trình gốc để viết lại bằng tư duy của mình, trích dẫn nguồn tài liệu chuẩn và ghi chú minh bạch phần hỗ trợ của AI.",
+                keyTakeaway: "Công nghệ 4.0 phát triển càng nhanh thì tư duy phản biện, đạo đức số và tinh thần học tập suốt đời càng trở thành lợi thế cạnh tranh cốt lõi của mỗi sinh viên.",
+                youtubeId: "oKKg_41s1qE",
+                youtubeUrl: "https://www.youtube.com/watch?v=oKKg_41s1qE",
+                videoDesc: "Tìm hiểu về quyền công dân số, dấu chân số và trách nhiệm sử dụng công nghệ an toàn, nhân văn.",
+                resources: [
+                    {
+                        id: "r8_1",
+                        type: "SLIDE",
+                        title: "Slide tóm tắt Chuyên đề 8: Đạo đức Số & 3 Trụ cột Chuyển đổi Số",
+                        source: "Học liệu chuẩn CNTT 4.0",
+                        url: "",
+                        desc: "Phân biệt Số hóa vs Chuyển đổi số, các loại giấy phép Creative Commons và quy tắc trích dẫn.",
+                        previewText: "NỘI DUNG SLIDE CHUYÊN ĐỀ 8:\n1. Digitization (Số hóa thông tin) -> Digitalization (Số hóa quy trình) -> Digital Transformation (Chuyển đổi số toàn diện).\n2. Giấy phép Creative Commons: CC BY (Ghi công tác giả), CC BY-NC (Phi thương mại).\n3. Quy tắc 3T trên mạng: Tỉnh táo kiểm chứng - Tôn trọng bản quyền - Trách nhiệm phát ngôn."
+                    },
+                    {
+                        id: "r8_2",
+                        type: "LINK",
+                        title: "Cổng Thông tin Chuyển đổi số Quốc gia - Bộ TT&TT",
+                        source: "Bộ Thông tin và Truyền thông",
+                        url: "https://dx.gov.vn",
+                        desc: "Cổng thông tin chính thống cập nhật chương trình, cẩm nang và chỉ số Chuyển đổi số quốc gia."
+                    }
+                ]
+            }
+        ];
+
+        // 2. NGÂN HÀNG 24 THẺ GHI NHỚ (FLASHCARDS - 3 THẺ MỖI CHUYÊN ĐỀ)
+        const FLASHCARDS_DATA = [
+            // Chuyên đề 1
+            { id: "fc1", topic: 1, term: "Kiến trúc Von Neumann gồm những thành phần nào?", def: "Gồm 5 thành phần: Thiết bị nhập (Input), Thiết bị xuất (Output), Khối điều khiển (CU), Khối tính toán số học/logic (ALU) và Bộ nhớ (Memory)." },
+            { id: "fc2", topic: 1, term: "Sự khác biệt cơ bản giữa RAM và SSD là gì?", def: "RAM là bộ nhớ khả biến (dữ liệu mất khi tắt nguồn), tốc độ siêu nhanh dùng cho tác vụ đang chạy; SSD là bộ nhớ lưu trữ bền vững dùng chip Flash." },
+            { id: "fc3", topic: 1, term: "1 Byte bằng bao nhiêu Bit và tương ứng bao nhiêu ký tự Hex?", def: "1 Byte = 8 Bits, có thể biểu diễn 256 giá trị (0–255) và tương ứng với chính xác 2 ký tự hệ Thập lục phân (Hexadecimal)." },
+            // Chuyên đề 2
+            { id: "fc4", topic: 2, term: "Nhân hệ điều hành (Kernel) có nhiệm vụ gì?", def: "Là lớp lõi của hệ điều hành, trực tiếp giao tiếp với phần cứng để điều phối CPU (lập lịch tiến trình), cấp phát RAM và quản lý thiết bị ngoại vi." },
+            { id: "fc5", topic: 2, term: "Hệ thống tập tin mặc định của Windows, macOS và Linux là gì?", def: "Windows sử dụng NTFS; macOS sử dụng APFS; các bản phân phối Linux phổ biến sử dụng ext4." },
+            { id: "fc6", topic: 2, term: "Bộ nhớ ảo (Virtual Memory) hoạt động như thế nào?", def: "Hệ điều hành sử dụng một phần không gian ổ cứng (SSD/HDD) làm vùng mở rộng cho RAM khi dung lượng RAM vật lý sắp đầy." },
+            // Chuyên đề 3
+            { id: "fc7", topic: 3, term: "Hệ thống DNS đóng vai trò gì trên Internet?", def: "Domain Name System (DNS) phân giải tên miền dễ nhớ đối với con người (như coursera.org) thành địa chỉ IP số học để định tuyến mạng." },
+            { id: "fc8", topic: 3, term: "Tại sao HTTPS an toàn hơn HTTP?", def: "HTTPS tích hợp giao thức mã hóa TLS/SSL giúp mã hóa toàn bộ dữ liệu trao đổi, xác thực danh tính máy chủ và chống nghe lén/sửa đổi gói tin." },
+            { id: "fc9", topic: 3, term: "Phân biệt IaaS, PaaS và SaaS trong Điện toán đám mây?", def: "IaaS cung cấp hạ tầng máy chủ ảo; PaaS cung cấp môi trường phát triển ứng dụng; SaaS cung cấp phần mềm hoàn chỉnh cho người dùng cuối qua trình duyệt." },
+            // Chuyên đề 4
+            { id: "fc10", topic: 4, term: "5 đặc trưng (5V) của Dữ liệu lớn (Big Data) là gì?", def: "Volume (Khối lượng), Velocity (Tốc độ), Variety (Đa dạng), Veracity (Độ tin cậy/xác thực) và Value (Giá trị khai thác)." },
+            { id: "fc11", topic: 4, term: "Khi nào nên chọn CSDL SQL thay vì NoSQL?", def: "Khi dữ liệu có cấu trúc bảng rõ ràng, có mối quan hệ chặt chẽ và đòi hỏi tính toàn vẹn giao dịch cao (như hệ thống tài chính, quản lý đào tạo)." },
+            { id: "fc12", topic: 4, term: "Dữ liệu phi cấu trúc chiếm tỷ trọng ra sao và gồm những gì?", def: "Chiếm hơn 80% dữ liệu số hiện nay, bao gồm văn bản tự do, hình ảnh, video, âm thanh và bài đăng mạng xã hội." },
+            // Chuyên đề 5
+            { id: "fc13", topic: 5, term: "Phân biệt Machine Learning (Học máy) và Deep Learning (Học sâu)?", def: "Machine Learning giúp máy học quy luật từ dữ liệu; Deep Learning là nhánh chuyên sâu của ML sử dụng mạng nơ-ron nhiều lớp để xử lý dữ liệu phức tạp." },
+            { id: "fc14", topic: 5, term: "Hiện tượng Ảo giác AI (Hallucination) là gì?", def: "Là tình trạng mô hình AI tạo sinh đưa ra thông tin sai lệch, bịa đặt trích dẫn hoặc thiếu căn cứ nhưng trình bày với giọng điệu rất tự tin." },
+            { id: "fc15", topic: 5, term: "5 yếu tố của một câu lệnh Prompt hiệu quả gồm những gì?", def: "1. Vai trò (Role) • 2. Nhiệm vụ cụ thể (Task) • 3. Bối cảnh & Nguồn tài liệu • 4. Định dạng đầu ra • 5. Yêu cầu trích dẫn & kiểm chứng." },
+            // Chuyên đề 6
+            { id: "fc16", topic: 6, term: "Điện toán biên (Edge Computing) giải quyết vấn đề gì cho IoT?", def: "Xử lý dữ liệu ngay tại thiết bị hoặc trạm gần nguồn cảm biến thay vì gửi hết lên Cloud, giúp giảm độ trễ và tiết kiệm băng thông mạng." },
+            { id: "fc17", topic: 6, term: "Đặc tính cốt lõi của công nghệ Chuỗi khối (Blockchain) là gì?", def: "Sổ cái phân tán phi tập trung, minh bạch và bất biến (dữ liệu đã ghi vào khối và xác thực thì không thể tự ý sửa đổi ngược)." },
+            { id: "fc18", topic: 6, term: "Bản sao số (Digital Twin) được ứng dụng để làm gì?", def: "Tạo mô hình ảo phản ánh trạng thái thời gian thực của đối tượng vật lý (nhà máy, động cơ, đô thị) để mô phỏng và dự đoán bảo trì." },
+            // Chuyên đề 7
+            { id: "fc19", topic: 7, term: "Ba trụ cột của mô hình CIA Triad trong An toàn thông tin là gì?", def: "Confidentiality (Tính bí mật), Integrity (Tính toàn vẹn) và Availability (Tính sẵn sàng)." },
+            { id: "fc20", topic: 7, term: "Xác thực đa yếu tố (MFA) kết hợp những nhóm yếu tố nào?", def: "Kết hợp ít nhất 2 trong 3 yếu tố: Thứ bạn biết (Mật khẩu), Thứ bạn có (Điện thoại/Token OTP) và Thứ thuộc về bạn (Vân tay/Khuôn mặt)." },
+            { id: "fc21", topic: 7, term: "Quy tắc sao lưu dữ liệu an toàn 3-2-1 có ý nghĩa gì?", def: "Lưu giữ 3 bản sao dữ liệu, trên 2 loại phương tiện lưu trữ khác nhau, trong đó có ít nhất 1 bản lưu trữ ngoại tuyến/tách biệt địa lý." },
+            // Chuyên đề 8
+            { id: "fc22", topic: 8, term: "Dấu chân số (Digital Footprint) là gì?", def: "Là toàn bộ vết dữ liệu (bài đăng, bình luận, hình ảnh, lịch sử tìm kiếm) mà một cá nhân để lại khi tương tác trên môi trường Internet." },
+            { id: "fc23", topic: 8, term: "Sự khác nhau giữa Số hóa (Digitization) và Chuyển đổi số?", def: "Số hóa là chuyển dữ liệu vật lý sang định dạng số; Chuyển đổi số là tái cấu trúc toàn diện quy trình hoạt động và tư duy dựa trên công nghệ số." },
+            { id: "fc24", topic: 8, term: "3 trụ cột của Chuyển đổi số quốc gia gồm những gì?", def: "Chính phủ số (quản trị hiệu quả), Kinh tế số (tăng trưởng mới) và Xã hội số (nâng cao chất lượng sống người dân)." }
+        ];
+
+        // 3. NGÂN HÀNG CÂU HỎI TRẮC NGHIỆM (PHỦ ĐỀU 8 CHUYÊN ĐỀ)
+        const QUIZ_BANK = [
+            {
+                id: "q1", topic: 1,
+                question: "Trong kiến trúc máy tính Von Neumann, thành phần nào trực tiếp thực hiện các phép tính số học và so sánh logic?",
+                options: ["Khối điều khiển (CU)", "Khối tính toán số học và logic (ALU)", "Bộ nhớ lưu trữ SSD", "Thiết bị xuất (Output)"],
+                answer: 1,
+                explanation: "ALU (Arithmetic Logic Unit) đảm nhiệm mọi phép toán số học (+, -, *, /) và phép toán logic (AND, OR, NOT), còn CU điều phối luồng lệnh."
+            },
+            {
+                id: "q2", topic: 1,
+                question: "Đặc điểm nào sau đây đúng nhất khi nói về bộ nhớ RAM của máy tính?",
+                options: ["Lưu trữ dữ liệu vĩnh viễn ngay cả khi mất điện", "Có tốc độ truy xuất chậm hơn ổ cứng HDD", "Là bộ nhớ khả biến, lưu chương trình đang chạy và mất dữ liệu khi tắt nguồn", "Chỉ dùng để lưu trữ hệ điều hành gốc (BIOS)"],
+                answer: 2,
+                explanation: "RAM (Random Access Memory) là bộ nhớ truy cập ngẫu nhiên có tốc độ rất cao phục vụ CPU xử lý tức thời, nhưng dữ liệu sẽ xóa sạch khi ngắt nguồn điện."
+            },
+            {
+                id: "q3", topic: 2,
+                question: "Lớp lõi của hệ điều hành chịu trách nhiệm trực tiếp quản lý CPU, RAM và giao tiếp phần cứng được gọi là gì?",
+                options: ["Shell (Vỏ giao diện)", "Kernel (Nhân hệ điều hành)", "Browser (Trình duyệt)", "Application Layer"],
+                answer: 1,
+                explanation: "Kernel là phần cốt lõi nhất của hệ điều hành, làm cầu nối trung gian kiểm soát toàn bộ tài nguyên phần cứng cho các ứng dụng."
+            },
+            {
+                id: "q4", topic: 3,
+                question: "Khi bạn nhập tên miền 'www.unesco.org' vào trình duyệt, hệ thống nào giúp chuyển đổi tên miền này thành địa chỉ IP tương ứng?",
+                options: ["Giao thức DHCP", "Hệ thống phân giải tên miền DNS", "Tường lửa Firewall", "Giao thức truyền tệp FTP"],
+                answer: 1,
+                explanation: "DNS (Domain Name System) dịch tên miền thân thiện với con người sang địa chỉ IP (IPv4 hoặc IPv6) để các bộ định tuyến dẫn đường gói tin."
+            },
+            {
+                id: "q5", topic: 3,
+                question: "Dịch vụ Google Workspace hoặc Notion cho phép người dùng sử dụng trực tiếp phần mềm qua trình duyệt thuộc mô hình đám mây nào?",
+                options: ["IaaS (Infrastructure as a Service)", "PaaS (Platform as a Service)", "SaaS (Software as a Service)", "DaaS (Data as a Service)"],
+                answer: 2,
+                explanation: "SaaS cung cấp ứng dụng phần mềm hoàn chỉnh trên nền tảng đám mây; người dùng chỉ cần đăng nhập và sử dụng mà không cần quản trị máy chủ."
+            },
+            {
+                id: "q6", topic: 4,
+                question: "Trong mô hình 5V của Dữ liệu lớn (Big Data), chữ 'Veracity' đề cập đến yếu tố nào?",
+                options: ["Khối lượng dữ liệu tính bằng Petabyte", "Tốc độ sinh dữ liệu theo thời gian thực", "Độ tin cậy, tính chính xác và sạch của dữ liệu", "Sự đa dạng về định dạng văn bản, video"],
+                answer: 2,
+                explanation: "Veracity thể hiện chất lượng và độ xác thực của dữ liệu. Dữ liệu có khối lượng lớn nhưng nhiễu và sai lệch sẽ làm giảm giá trị phân tích."
+            },
+            {
+                id: "q7", topic: 5,
+                question: "Phát biểu nào sau đây mô tả chính xác mối quan hệ giữa AI, Machine Learning và Deep Learning?",
+                options: ["Ba khái niệm hoàn toàn đồng nghĩa với nhau", "Deep Learning là một nhánh của Machine Learning, và Machine Learning là một lĩnh vực của AI", "AI là một nhánh nhỏ nằm bên trong Deep Learning", "Machine Learning chỉ hoạt động khi không có dữ liệu"],
+                answer: 1,
+                explanation: "AI là lĩnh vực rộng nhất; Machine Learning là phương pháp học từ dữ liệu thuộc AI; Deep Learning là nhánh chuyên sâu của ML dùng mạng nơ-ron nhiều lớp."
+            },
+            {
+                id: "q8", topic: 5,
+                question: "Để hạn chế tình trạng AI tạo sinh 'bịa đặt thông tin' (Hallucination) khi ôn tập môn học, cách làm nào hiệu quả nhất?",
+                options: ["Yêu cầu AI viết càng dài càng tốt", "Nạp slide bài giảng gốc vào công cụ như NotebookLM và yêu cầu AI trả lời kèm trích dẫn nguồn", "Không bao giờ kiểm tra lại câu trả lời của AI", "Chỉ nhập từ khóa 1–2 chữ vào ô lệnh"],
+                answer: 1,
+                explanation: "Grounding (neo câu trả lời vào nguồn tài liệu cung cấp) kết hợp đối chiếu trích dẫn giúp kiểm soát độ chính xác của AI tối đa."
+            },
+            {
+                id: "q9", topic: 6,
+                question: "Lợi ích chính của Điện toán biên (Edge Computing) khi kết hợp với hệ thống cảm biến IoT là gì?",
+                options: ["Xử lý dữ liệu ngay gần nguồn phát sinh để giảm độ trễ và tiết kiệm băng thông mạng", "Thay thế hoàn toàn nhu cầu sử dụng cảm biến vật lý", "Xóa bỏ mọi yêu cầu về bảo mật thiết bị", "Chỉ hoạt động khi ngắt kết nối điện"],
+                answer: 0,
+                explanation: "Edge Computing đưa năng lực tính toán lại gần thiết bị IoT, đặc biệt quan trọng với xe tự hành, dây chuyền nhà máy và cảnh báo y tế tức thời."
+            },
+            {
+                id: "q10", topic: 7,
+                question: "Ba yếu tố cốt lõi của mô hình an toàn thông tin CIA Triad bao gồm:",
+                options: ["Cloud - Internet - Automation", "Confidentiality (Bí mật) - Integrity (Toàn vẹn) - Availability (Sẵn sàng)", "Control - Identity - Access", "Cyber - Intelligence - Analysis"],
+                answer: 1,
+                explanation: "CIA Triad là nền tảng thiết kế mọi hệ thống bảo mật: giữ bí mật thông tin, bảo đảm dữ liệu không bị sửa đổi trái phép và luôn sẵn sàng phục vụ."
+            },
+            {
+                id: "q11", topic: 7,
+                question: "Hành vi giả mạo email hoặc trang web ngân hàng để lừa người dùng nhập mật khẩu và mã OTP được gọi là gì?",
+                options: ["Phishing (Tấn công giả mạo)", "Defragmentation (Chống phân mảnh)", "Overclocking (Ép xung)", "Virtualization (Ảo hóa)"],
+                answer: 0,
+                explanation: "Phishing khai thác sự mất cảnh giác của người dùng thông qua thông điệp khẩn cấp giả mạo các tổ chức uy tín để đánh cắp thông tin định danh."
+            },
+            {
+                id: "q12", topic: 8,
+                question: "Hành động nào sau đây thể hiện đạo đức số và liêm chính học thuật khi sử dụng AI hỗ trợ làm bài tập?",
+                options: ["Sao chép nguyên văn câu trả lời của AI và nộp dưới tên mình", "Dùng AI để gợi ý ý tưởng, tự đối chiếu giáo trình, viết lại bằng văn phong cá nhân và ghi nhận nguồn hỗ trợ", "Chia sẻ toàn bộ mật khẩu tài khoản trường học lên nhóm chat", "Tải lên AI các tài liệu nội bộ mật chưa được phép công bố"],
+                answer: 1,
+                explanation: "Sử dụng AI minh bạch, có tư duy phản biện, kiểm chứng nguồn gốc và tuân thủ quy định trích dẫn là chuẩn mực của công dân số có trách nhiệm."
+            }
+        ];
+
+        // 4. QUẢN LÝ TRẠNG THÁI (STATE) & LOCALSTORAGE
+        const STORAGE_KEY = 'cntt_4_0_workspace_v1';
+
+        let workspaceState = loadWorkspaceState();
+        let currentMainView = 'overview'; // 'overview' | 'topic' | 'flashcards' | 'quiz'
+        let currentTopicId = 1;
+        let currentNoteTopicId = 1;
+
+        // State cho Flashcards
+        let filteredFlashcards = [...FLASHCARDS_DATA];
+        let currentFcIndex = 0;
+        let isFcFlipped = false;
+
+        // State cho Quiz
+        let activeQuizQuestions = [];
+        let userQuizAnswers = {};
+        let isQuizSubmitted = false;
+        let quizSeconds = 0;
+        let quizTimerInterval = null;
+
+        function loadWorkspaceState() {
+            const defaultState = {
+                topicStatus: { 1: 'in_progress', 2: 'not_started', 3: 'not_started', 4: 'not_started', 5: 'not_started', 6: 'not_started', 7: 'not_started', 8: 'not_started' },
+                notes: {
+                    1: "Ghi chú mẫu Chuyên đề 1:\n- Kiến trúc Von Neumann gồm CU, ALU, Registers, Memory và I/O.\n- Cần ôn lại cách chuyển đổi nhanh từ nhị phân sang Hexa.",
+                    2: "", 3: "", 4: "", 5: "", 6: "", 7: "", 8: ""
+                },
+                customResources: { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] },
+                flashcardStatus: {}, // { fc1: 'known' | 'review' }
+                bestQuizScore: null
+            };
+
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    return {
+                        ...defaultState,
+                        ...parsed,
+                        topicStatus: { ...defaultState.topicStatus, ...(parsed.topicStatus || {}) },
+                        notes: { ...defaultState.notes, ...(parsed.notes || {}) },
+                        customResources: { ...defaultState.customResources, ...(parsed.customResources || {}) }
+                    };
+                }
+            } catch (e) {
+                console.error("Lỗi đọc dữ liệu localStorage:", e);
+            }
+            return defaultState;
+        }
+
+        function saveWorkspaceState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(workspaceState));
+            } catch (e) {
+                showToast("Không thể lưu vào trình duyệt (bộ nhớ đầy).", "error");
+            }
+        }
+
+        // 5. KHỞI TẠO & RENDER GIAO DIỆN CHÍNH
+        function initWorkspace() {
+            renderLeftSidebarTopics();
+            renderOverviewGrid();
+            initRightNotePanel();
+            updateAllProgressUI();
+            updateFlashcardUI();
+            updateQuizBestBadge();
+            lucide.createIcons();
+        }
+
+        function getStatusMeta(status) {
+            if (status === 'mastered') {
+                return { label: 'Đã nắm vững', dot: 'bg-emerald-500', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: '🟢' };
+            }
+            if (status === 'in_progress') {
+                return { label: 'Đang ôn', dot: 'bg-amber-500', badge: 'bg-amber-50 text-amber-800 border-amber-200', icon: '🟡' };
+            }
+            return { label: 'Chưa học', dot: 'bg-slate-300', badge: 'bg-slate-100 text-slate-600 border-slate-200', icon: '⚪' };
+        }
+
+        // Render danh sách 8 chuyên đề bên trái
+        function renderLeftSidebarTopics() {
+            const container = document.getElementById('topics-nav-list');
+            container.innerHTML = TOPICS_DATA.map(t => {
+                const status = workspaceState.topicStatus[t.id] || 'not_started';
+                const meta = getStatusMeta(status);
+                const isActive = currentMainView === 'topic' && currentTopicId === t.id;
+                const hasNote = Boolean((workspaceState.notes[t.id] || '').trim());
+
+                return `
+                    <button onclick="openTopic(${t.id})" class="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-left text-xs transition group ${isActive ? 'nav-item-active' : 'text-notion-text hover:bg-notion-hover'}">
+                        <div class="flex items-center gap-2 min-w-0 pr-1">
+                            <span class="w-2 h-2 rounded-full ${meta.dot} shrink-0" title="${meta.label}"></span>
+                            <span class="font-mono text-[11px] text-notion-muted shrink-0">0${t.id}</span>
+                            <span class="truncate font-medium">${escapeHTML(t.shortTitle)}</span>
+                        </div>
+                        ${hasNote ? `<i data-lucide="file-text" class="w-3 h-3 text-notion-muted shrink-0" title="Có ghi chú cá nhân"></i>` : ''}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        // Render Lưới 8 chuyên đề ở trang Tổng quan
+        function renderOverviewGrid() {
+            const grid = document.getElementById('overview-topics-grid');
+            grid.innerHTML = TOPICS_DATA.map(t => {
+                const status = workspaceState.topicStatus[t.id] || 'not_started';
+                const meta = getStatusMeta(status);
+                const totalDocs = t.resources.length + (workspaceState.customResources[t.id] || []).length;
+                const hasNote = Boolean((workspaceState.notes[t.id] || '').trim());
+
+                return `
+                    <article onclick="openTopic(${t.id})" class="group bg-white border border-notion-border hover:border-coursera-blue rounded-2xl p-5 shadow-2xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-3">
+                                <span class="text-xs font-mono font-bold text-coursera-blue bg-coursera-light px-2.5 py-1 rounded-lg">
+                                    CHUYÊN ĐỀ 0${t.id}
+                                </span>
+                                <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${meta.badge}">
+                                    ${meta.label}
+                                </span>
+                            </div>
+                            <h4 class="text-base font-bold text-notion-text group-hover:text-coursera-blue transition leading-snug">
+                                ${escapeHTML(t.title.replace(/^Chuyên đề \d+:\s*/, ''))}
+                            </h4>
+                            <p class="text-xs text-notion-muted mt-2 line-clamp-2 leading-relaxed">
+                                ${escapeHTML(t.subtitle)}
+                            </p>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t border-notion-border flex items-center justify-between text-[11px] text-notion-muted">
+                            <div class="flex items-center gap-3">
+                                <span class="flex items-center gap-1"><i data-lucide="cpu" class="w-3.5 h-3.5 text-coursera-blue"></i> Sơ đồ SVG</span>
+                                <span class="flex items-center gap-1"><i data-lucide="youtube" class="w-3.5 h-3.5 text-rose-600"></i> Video</span>
+                                <span class="flex items-center gap-1"><i data-lucide="folder" class="w-3.5 h-3.5 text-amber-600"></i> ${totalDocs} tài liệu</span>
+                            </div>
+                            ${hasNote ? `<span class="text-coursera-blue font-semibold">Đã ghi chú</span>` : `<span>Mở bài →</span>`}
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        // Cập nhật toàn bộ chỉ số tiến độ (Overview + Left Sidebar + Right Panel)
+        function updateAllProgressUI() {
+            let mastered = 0;
+            let inProgress = 0;
+            let notStarted = 0;
+
+            TOPICS_DATA.forEach(t => {
+                const st = workspaceState.topicStatus[t.id] || 'not_started';
+                if (st === 'mastered') mastered++;
+                else if (st === 'in_progress') inProgress++;
+                else notStarted++;
+            });
+
+            const pct = Math.round((mastered / TOPICS_DATA.length) * 100);
+
+            document.getElementById('sidebar-mastery-badge').textContent = `${mastered}/8`;
+            document.getElementById('overview-progress-text').textContent = `${pct}% (${mastered}/8 chuyên đề nắm vững)`;
+            document.getElementById('overview-progress-bar').style.width = `${pct}%`;
+
+            document.getElementById('right-panel-progress-pct').textContent = `${pct}%`;
+            document.getElementById('right-panel-progress-bar').style.width = `${pct}%`;
+            document.getElementById('stat-mastered').textContent = mastered;
+            document.getElementById('stat-inprogress').textContent = inProgress;
+            document.getElementById('stat-notstarted').textContent = notStarted;
+        }
+
+        // 6. ĐIỀU HƯỚNG GIỮA CÁC CHẾ ĐỘ XEM & MỞ CHUYÊN ĐỀ
+        function switchMainView(viewName) {
+            currentMainView = viewName;
+
+            ['overview', 'topic', 'flashcards', 'quiz'].forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden');
+            });
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+
+            // Cập nhật active nav bên trái
+            ['overview', 'flashcards', 'quiz'].forEach(nav => {
+                const el = document.getElementById(`nav-${nav}`);
+                if (el) {
+                    if (viewName === nav) el.classList.add('nav-item-active');
+                    else el.classList.remove('nav-item-active');
+                }
+            });
+
+            const statusControl = document.getElementById('topic-status-control');
+            if (viewName === 'topic') {
+                statusControl.classList.remove('hidden');
+                statusControl.classList.add('flex');
+            } else {
+                statusControl.classList.add('hidden');
+                statusControl.classList.remove('flex');
+            }
+
+            if (viewName === 'overview') {
+                document.getElementById('breadcrumb-current').textContent = 'Tổng quan Khóa học';
+                renderOverviewGrid();
+            } else if (viewName === 'flashcards') {
+                document.getElementById('breadcrumb-current').textContent = 'Thẻ ghi nhớ (Flashcards)';
+                updateFlashcardUI();
+            } else if (viewName === 'quiz') {
+                document.getElementById('breadcrumb-current').textContent = 'Trắc nghiệm kiểm tra nhanh 10 câu';
+            }
+
+            renderLeftSidebarTopics();
+            closeAllSidebars();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            lucide.createIcons();
+        }
+
+        function openTopic(topicId) {
+            const topic = TOPICS_DATA.find(t => t.id === topicId);
+            if (!topic) return;
+
+            currentTopicId = topicId;
+            switchMainView('topic');
+
+            // Tự động chuyển từ "Chưa học" sang "Đang ôn" khi mở lần đầu
+            if (workspaceState.topicStatus[topicId] === 'not_started') {
+                workspaceState.topicStatus[topicId] = 'in_progress';
+                saveWorkspaceState();
+                updateAllProgressUI();
+                renderLeftSidebarTopics();
+            }
+
+            // Đồng bộ Sổ ghi chú bên phải với chuyên đề đang học
+            selectNoteTopic(topicId);
+
+            // Cập nhật Breadcrumb & Header
+            document.getElementById('breadcrumb-current').textContent = `Chuyên đề 0${topic.id}: ${topic.shortTitle}`;
+            document.getElementById('topic-tag').textContent = `CHUYÊN ĐỀ 0${topic.id} / 08`;
+            document.getElementById('topic-title').textContent = topic.title;
+            document.getElementById('topic-subtitle').textContent = topic.subtitle;
+            document.getElementById('status-select').value = workspaceState.topicStatus[topicId] || 'in_progress';
+
+            document.getElementById('btn-prev-topic').disabled = topicId === 1;
+            document.getElementById('btn-next-topic').disabled = topicId === TOPICS_DATA.length;
+
+            // Render Mục tiêu học tập
+            document.getElementById('topic-objectives').innerHTML = topic.objectives.map(obj => `
+                <li class="flex items-start gap-2">
+                    <i data-lucide="check" class="w-4 h-4 text-coursera-blue shrink-0 mt-0.5"></i>
+                    <span>${escapeHTML(obj)}</span>
+                </li>
+            `).join('');
+
+            // Render Sơ đồ SVG
+            document.getElementById('topic-svg-container').innerHTML = topic.svgMarkup;
+            document.getElementById('topic-svg-caption').textContent = topic.svgCaption;
+
+            // Render Khối Lý thuyết
+            document.getElementById('topic-theory-blocks').innerHTML = topic.theoryBlocks.map(block => `
+                <div class="p-5 rounded-2xl bg-white border border-notion-border hover:border-slate-300 transition space-y-2">
+                    <h4 class="text-sm sm:text-base font-bold text-notion-text">${escapeHTML(block.heading)}</h4>
+                    <p class="text-sm text-notion-text/90 leading-relaxed">${block.content}</p>
+                </div>
+            `).join('');
+
+            // Render Ví dụ & Điểm nhấn
+            document.getElementById('topic-example').textContent = topic.example;
+            document.getElementById('topic-key-takeaway').textContent = topic.keyTakeaway;
+
+            // Render Video YouTube Nhúng
+            const iframe = document.getElementById('topic-youtube-iframe');
+            iframe.src = `https://www.youtube.com/embed/${topic.youtubeId}?rel=0`;
+            document.getElementById('topic-youtube-fallback').href = topic.youtubeUrl;
+            document.getElementById('topic-video-desc').textContent = topic.videoDesc;
+
+            // Render Kho Tài liệu
+            renderTopicResources(topic);
+
+            lucide.createIcons();
+        }
+
+        function navigateTopic(step) {
+            const nextId = currentTopicId + step;
+            if (nextId >= 1 && nextId <= TOPICS_DATA.length) {
+                openTopic(nextId);
+            }
+        }
+
+        function updateCurrentTopicStatus(newStatus) {
+            workspaceState.topicStatus[currentTopicId] = newStatus;
+            saveWorkspaceState();
+            updateAllProgressUI();
+            renderLeftSidebarTopics();
+            showToast(`Đã cập nhật trạng thái Chuyên đề 0${currentTopicId}!`, "success");
+        }
+
+        function markTopicMasteredAndNext() {
+            workspaceState.topicStatus[currentTopicId] = 'mastered';
+            saveWorkspaceState();
+            updateAllProgressUI();
+            renderLeftSidebarTopics();
+            showToast(`Chúc mừng! Bạn đã nắm vững Chuyên đề 0${currentTopicId}.`, "success");
+
+            if (currentTopicId < TOPICS_DATA.length) {
+                openTopic(currentTopicId + 1);
+            } else {
+                switchMainView('overview');
+            }
+        }
+
+        // 7. QUẢN LÝ KHO TÀI LIỆU CHÍNH THỐNG & CÁ NHÂN
+        let currentPreviewDoc = null;
+
+        function renderTopicResources(topic) {
+            const container = document.getElementById('topic-resources-list');
+            const customList = workspaceState.customResources[topic.id] || [];
+            const allDocs = [
+                ...topic.resources.map(r => ({ ...r, isCustom: false })),
+                ...customList.map(r => ({ ...r, isCustom: true }))
+            ];
+
+            container.innerHTML = allDocs.map(doc => {
+                const badgeColor = doc.type === 'LINK'
+                    ? 'bg-emerald-100 text-emerald-800'
+                    : 'bg-blue-100 text-coursera-blue';
+
+                return `
+                    <div class="p-4 rounded-xl bg-notion-sidebar/70 border border-notion-border hover:border-coursera-blue transition flex flex-col justify-between gap-3">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-1.5">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor}">${escapeHTML(doc.type)}</span>
+                                <span class="text-[11px] text-notion-muted truncate">${escapeHTML(doc.source || 'Học liệu')}</span>
+                            </div>
+                            <h4 class="text-sm font-bold text-notion-text leading-snug">${escapeHTML(doc.title)}</h4>
+                            <p class="text-xs text-notion-muted mt-1 line-clamp-2">${escapeHTML(doc.desc || '')}</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-2 border-t border-notion-border/80">
+                            ${doc.url ? `
+                                <a href="${escapeHTML(doc.url)}" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-coursera-blue hover:underline inline-flex items-center gap-1">
+                                    Truy cập nguồn <i data-lucide="external-link" class="w-3 h-3"></i>
+                                </a>
+                            ` : `
+                                <button onclick="openDocPreview('${doc.id}')" class="text-xs font-semibold text-coursera-blue hover:underline inline-flex items-center gap-1">
+                                    Xem nhanh nội dung <i data-lucide="eye" class="w-3 h-3"></i>
+                                </button>
+                            `}
+                            ${doc.isCustom ? `
+                                <button onclick="deleteCustomResource('${doc.id}')" class="text-xs text-rose-600 hover:underline">Xóa</button>
+                            ` : `<span class="text-[10px] text-notion-muted">Chính thống</span>`}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openDocPreview(docId) {
+            const topic = TOPICS_DATA.find(t => t.id === currentTopicId);
+            if (!topic) return;
+            const allDocs = [...topic.resources, ...(workspaceState.customResources[topic.id] || [])];
+            const doc = allDocs.find(d => d.id === docId);
+            if (!doc) return;
+
+            currentPreviewDoc = doc;
+            document.getElementById('preview-doc-type').textContent = doc.type;
+            document.getElementById('preview-doc-title').textContent = doc.title;
+            document.getElementById('preview-doc-source').textContent = `Nguồn: ${doc.source || 'Học liệu chuẩn'}`;
+            document.getElementById('preview-doc-body').innerHTML = `<pre class="whitespace-pre-wrap font-sans text-sm text-notion-text">${escapeHTML(doc.previewText || doc.desc || 'Nội dung tóm tắt học liệu.')}</pre>`;
+
+            openModal('modal-doc-preview');
+        }
+
+        function downloadPreviewAsTxt() {
+            if (!currentPreviewDoc) return;
+            const text = `${currentPreviewDoc.title}\nNguồn: ${currentPreviewDoc.source}\n----------------------------------------\n${currentPreviewDoc.previewText || currentPreviewDoc.desc}`;
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `TaiLieu_ChuyenDe0${currentTopicId}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast("Đã tải xuống bản tóm tắt tài liệu!", "success");
+        }
+
+        function openAddResourceModal() {
+            openModal('modal-add-resource');
+        }
+
+        function handleAddResource(e) {
+            e.preventDefault();
+            const title = document.getElementById('res-title').value.trim();
+            const type = document.getElementById('res-type').value;
+            const source = document.getElementById('res-source').value.trim();
+            const url = document.getElementById('res-url').value.trim();
+            const desc = document.getElementById('res-desc').value.trim();
+
+            if (!title) return;
+
+            const newDoc = {
+                id: 'cust_' + Date.now(),
+                title,
+                type,
+                source: source || 'Tài liệu cá nhân',
+                url,
+                desc: desc || 'Học liệu bổ sung do người học tự lưu trữ.',
+                previewText: `${title}\nNguồn: ${source || 'Cá nhân'}\n\n${desc}`
+            };
+
+            if (!workspaceState.customResources[currentTopicId]) {
+                workspaceState.customResources[currentTopicId] = [];
+            }
+            workspaceState.customResources[currentTopicId].push(newDoc);
+            saveWorkspaceState();
+
+            e.target.reset();
+            closeModal('modal-add-resource');
+            const topic = TOPICS_DATA.find(t => t.id === currentTopicId);
+            renderTopicResources(topic);
+            showToast("Đã thêm tài liệu vào chuyên đề!", "success");
+        }
+
+        function deleteCustomResource(docId) {
+            workspaceState.customResources[currentTopicId] = (workspaceState.customResources[currentTopicId] || []).filter(d => d.id !== docId);
+            saveWorkspaceState();
+            const topic = TOPICS_DATA.find(t => t.id === currentTopicId);
+            renderTopicResources(topic);
+            showToast("Đã xóa tài liệu cá nhân.", "info");
+        }
+
+        // 8. SỔ GHI CHÚ CÁ NHÂN (LOCALSTORAGE) & TÌM KIẾM TOÀN CỤC
+        let noteSaveTimeout = null;
+
+        function initRightNotePanel() {
+            const selector = document.getElementById('note-topic-selector');
+            selector.innerHTML = TOPICS_DATA.map(t => `
+                <option value="${t.id}">CĐ 0${t.id}: ${escapeHTML(t.shortTitle)}</option>
+            `).join('');
+            selectNoteTopic(1);
+        }
+
+        function selectNoteTopic(topicId) {
+            currentNoteTopicId = topicId;
+            document.getElementById('note-topic-selector').value = topicId;
+            document.getElementById('personal-note-editor').value = workspaceState.notes[topicId] || '';
+        }
+
+        function handleNoteInput(value) {
+            const indicator = document.getElementById('note-save-indicator');
+            indicator.innerHTML = `<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i> Đang lưu...`;
+            indicator.className = "text-[11px] font-medium text-amber-600 flex items-center gap-1";
+            lucide.createIcons();
+
+            clearTimeout(noteSaveTimeout);
+            noteSaveTimeout = setTimeout(() => {
+                workspaceState.notes[currentNoteTopicId] = value;
+                saveWorkspaceState();
+                renderLeftSidebarTopics();
+                indicator.innerHTML = `<i data-lucide="cloud-check" class="w-3.5 h-3.5"></i> Đã lưu`;
+                indicator.className = "text-[11px] font-medium text-emerald-600 flex items-center gap-1";
+                lucide.createIcons();
+            }, 400);
+        }
+
+        function insertNoteTemplate(type) {
+            const editor = document.getElementById('personal-note-editor');
+            const topic = TOPICS_DATA.find(t => t.id === currentNoteTopicId);
+            let tpl = "";
+
+            if (type === 'cornell') {
+                tpl = `\n=== GHI CHÚ CORNELL: ${topic.shortTitle.toUpperCase()} ===\n[1. TỪ KHÓA & CÂU HỎI GỢI MỞ]\n- \n\n[2. NỘI DUNG GHI CHÉP CHÍNH]\n- \n\n[3. TÓM TẮT CỐT LÕI (2-3 CÂU)]\n- \n`;
+            } else {
+                tpl = `\n=== TÓM TẮT NHANH: ${topic.shortTitle.toUpperCase()} ===\n• Ý chính 1: \n• Ý chính 2: \n• Ví dụ thực tế: \n• Điểm cần ôn lại: \n`;
+            }
+
+            editor.value = (editor.value ? editor.value + "\n" : "") + tpl.trimStart();
+            handleNoteInput(editor.value);
+            editor.focus();
+            showToast("Đã chèn mẫu ghi chú!", "success");
+        }
+
+        function handleGlobalSearch(query) {
+            const q = query.trim().toLowerCase();
+            const resBox = document.getElementById('global-search-results');
+            const resList = document.getElementById('global-search-list');
+
+            if (!q) {
+                resBox.classList.add('hidden');
+                return;
+            }
+
+            if (currentMainView !== 'overview') {
+                switchMainView('overview');
+            }
+
+            resBox.classList.remove('hidden');
+            const matches = [];
+
+            TOPICS_DATA.forEach(t => {
+                const noteText = workspaceState.notes[t.id] || '';
+                const inTheory = t.title.toLowerCase().includes(q) ||
+                    t.subtitle.toLowerCase().includes(q) ||
+                    t.theoryBlocks.some(b => b.heading.toLowerCase().includes(q) || b.content.toLowerCase().includes(q));
+                const inNote = noteText.toLowerCase().includes(q);
+
+                if (inTheory || inNote) {
+                    matches.push({
+                        topic: t,
+                        source: inNote ? 'Khớp trong Ghi chú cá nhân & Lý thuyết' : 'Khớp trong Nội dung Chuyên đề',
+                        snippet: inNote ? noteText.slice(0, 140) + '...' : t.subtitle
+                    });
+                }
+            });
+
+            if (matches.length === 0) {
+                resList.innerHTML = `<div class="p-4 rounded-xl bg-notion-sidebar border border-notion-border text-xs text-notion-muted">Không tìm thấy kết quả nào cho từ khóa "<strong>${escapeHTML(query)}</strong>".</div>`;
+            } else {
+                resList.innerHTML = matches.map(m => `
+                    <div onclick="openTopic(${m.topic.id})" class="p-3.5 rounded-xl bg-coursera-light/50 border border-blue-200 hover:border-coursera-blue cursor-pointer transition">
+                        <div class="flex items-center justify-between text-xs mb-1">
+                            <span class="font-bold text-coursera-blue">Chuyên đề 0${m.topic.id}: ${escapeHTML(m.topic.shortTitle)}</span>
+                            <span class="text-[11px] text-notion-muted">${m.source}</span>
+                        </div>
+                        <p class="text-xs text-notion-text line-clamp-2">${escapeHTML(m.snippet)}</p>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function clearGlobalSearch() {
+            document.getElementById('global-search').value = '';
+            document.getElementById('global-search-results').classList.add('hidden');
+        }
+
+        // Xuất / Nhập dữ liệu sao lưu JSON & Markdown
+        function exportWorkspaceJSON() {
+            const dataStr = JSON.stringify(workspaceState, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `CNTT_4.0_Workspace_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast("Đã xuất tệp sao lưu JSON!", "success");
+        }
+
+        function exportNotesMarkdown() {
+            let md = `# SỔ GHI CHÚ HỌC TẬP: NHẬP MÔN CNTT & KỶ NGUYÊN SỐ 4.0\nNgày xuất: ${new Date().toLocaleDateString('vi-VN')}\n\n`;
+            TOPICS_DATA.forEach(t => {
+                const note = (workspaceState.notes[t.id] || '').trim();
+                const status = getStatusMeta(workspaceState.topicStatus[t.id]).label;
+                md += `## ${t.title} [${status}]\n`;
+                md += note ? `${note}\n\n` : `_Chưa có ghi chú cá nhân._\n\n`;
+            });
+
+            const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `GhiChu_CNTT_4.0_${new Date().toISOString().slice(0, 10)}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast("Đã xuất toàn bộ ghi chú ra tệp Markdown (.md)!", "success");
+        }
+
+        function importWorkspaceJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (imported && imported.topicStatus && imported.notes) {
+                        workspaceState = imported;
+                        saveWorkspaceState();
+                        initWorkspace();
+                        showToast("Đã khôi phục dữ liệu từ bản sao lưu!", "success");
+                    } else {
+                        showToast("Tệp JSON không hợp lệ!", "error");
+                    }
+                } catch (err) {
+                    showToast("Lỗi đọc tệp sao lưu!", "error");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // 9. HỆ THỐNG THẺ GHI NHỚ (FLASHCARDS 3D)
+        function openFlashcardsForTopic() {
+            document.getElementById('fc-topic-filter').value = String(currentTopicId);
+            filterFlashcards(String(currentTopicId));
+            switchMainView('flashcards');
+        }
+
+        function filterFlashcards(topicVal) {
+            if (topicVal === 'all') {
+                filteredFlashcards = [...FLASHCARDS_DATA];
+            } else {
+                const tid = Number(topicVal);
+                filteredFlashcards = FLASHCARDS_DATA.filter(fc => fc.topic === tid);
+            }
+            currentFcIndex = 0;
+            isFcFlipped = false;
+            document.getElementById('flashcard-inner').classList.remove('rotate-y-180');
+            updateFlashcardUI();
+        }
+
+        function shuffleFlashcards() {
+            for (let i = filteredFlashcards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [filteredFlashcards[i], filteredFlashcards[j]] = [filteredFlashcards[j], filteredFlashcards[i]];
+            }
+            currentFcIndex = 0;
+            isFcFlipped = false;
+            document.getElementById('flashcard-inner').classList.remove('rotate-y-180');
+            updateFlashcardUI();
+            showToast("Đã trộn ngẫu nhiên bộ thẻ!", "info");
+        }
+
+        function flipFlashcard() {
+            isFcFlipped = !isFcFlipped;
+            const inner = document.getElementById('flashcard-inner');
+            if (isFcFlipped) inner.classList.add('rotate-y-180');
+            else inner.classList.remove('rotate-y-180');
+        }
+
+        function nextFlashcard() {
+            if (filteredFlashcards.length === 0) return;
+            currentFcIndex = (currentFcIndex + 1) % filteredFlashcards.length;
+            isFcFlipped = false;
+            document.getElementById('flashcard-inner').classList.remove('rotate-y-180');
+            updateFlashcardUI();
+        }
+
+        function prevFlashcard() {
+            if (filteredFlashcards.length === 0) return;
+            currentFcIndex = (currentFcIndex - 1 + filteredFlashcards.length) % filteredFlashcards.length;
+            isFcFlipped = false;
+            document.getElementById('flashcard-inner').classList.remove('rotate-y-180');
+            updateFlashcardUI();
+        }
+
+        function markFlashcardStatus(status) {
+            const card = filteredFlashcards[currentFcIndex];
+            if (!card) return;
+            workspaceState.flashcardStatus[card.id] = status;
+            saveWorkspaceState();
+            updateFlashcardUI();
+            showToast(status === 'known' ? "Đã đánh dấu: Đã thuộc!" : "Đã đưa vào danh sách cần ôn lại.", status === 'known' ? "success" : "info");
+            setTimeout(nextFlashcard, 250);
+        }
+
+        function updateFlashcardUI() {
+            const card = filteredFlashcards[currentFcIndex];
+            if (!card) return;
+
+            document.getElementById('fc-counter').textContent = `Thẻ ${currentFcIndex + 1} / ${filteredFlashcards.length}`;
+            document.getElementById('fc-front-badge').textContent = `Chuyên đề 0${card.topic}`;
+            document.getElementById('fc-front-text').textContent = card.term;
+            document.getElementById('fc-back-text').textContent = card.def;
+
+            const st = workspaceState.flashcardStatus[card.id];
+            const pill = document.getElementById('fc-status-pill');
+            if (st === 'known') {
+                pill.innerHTML = `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold">✓ Đã thuộc</span>`;
+            } else if (st === 'review') {
+                pill.innerHTML = `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold">↻ Cần ôn lại</span>`;
+            } else {
+                pill.innerHTML = `<i data-lucide="repeat" class="w-3.5 h-3.5"></i> Nhấp để lật thẻ`;
+            }
+
+            // Đếm tổng số thẻ đã thuộc / cần ôn
+            let known = 0, review = 0;
+            Object.values(workspaceState.flashcardStatus).forEach(v => {
+                if (v === 'known') known++;
+                if (v === 'review') review++;
+            });
+            document.getElementById('fc-known-count').textContent = known;
+            document.getElementById('fc-review-count').textContent = review;
+            lucide.createIcons();
+        }
+
+        // Phím tắt Space để lật thẻ khi đang ở chế độ Flashcards
+        document.addEventListener('keydown', (e) => {
+            if (currentMainView === 'flashcards' && document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    flipFlashcard();
+                } else if (e.code === 'ArrowRight') {
+                    nextFlashcard();
+                } else if (e.code === 'ArrowLeft') {
+                    prevFlashcard();
+                }
+            }
+        });
+
+        // 10. HỆ THỐNG TRẮC NGHIỆM KIỂM TRA NHANH 10 CÂU
+        function updateQuizBestBadge() {
+            const best = workspaceState.bestQuizScore;
+            const text = best !== null ? `${best}/10` : '--/10';
+            document.getElementById('quiz-best-score').textContent = text;
+            if (best !== null) {
+                document.getElementById('sidebar-quiz-badge').textContent = `Max ${best}/10`;
+            }
+        }
+
+        function startNewQuiz() {
+            // Trộn ngẫu nhiên và chọn 10 câu hỏi từ ngân hàng câu hỏi
+            const shuffled = [...QUIZ_BANK].sort(() => Math.random() - 0.5);
+            activeQuizQuestions = shuffled.slice(0, 10);
+            userQuizAnswers = {};
+            isQuizSubmitted = false;
+
+            document.getElementById('quiz-start-screen').classList.add('hidden');
+            document.getElementById('quiz-active-screen').classList.remove('hidden');
+            document.getElementById('quiz-result-banner').classList.add('hidden');
+            document.getElementById('quiz-submit-bar').classList.remove('hidden');
+            document.getElementById('quiz-answered-count').textContent = 'Đã trả lời: 0/10 câu';
+
+            // Khởi động đồng hồ
+            clearInterval(quizTimerInterval);
+            quizSeconds = 0;
+            updateQuizTimerDisplay();
+            quizTimerInterval = setInterval(() => {
+                quizSeconds++;
+                updateQuizTimerDisplay();
+            }, 1000);
+
+            renderQuizQuestions();
+            lucide.createIcons();
+        }
+
+        function updateQuizTimerDisplay() {
+            const mins = String(Math.floor(quizSeconds / 60)).padStart(2, '0');
+            const secs = String(quizSeconds % 60).padStart(2, '0');
+            document.getElementById('quiz-timer').textContent = `${mins}:${secs}`;
+        }
+
+        function renderQuizQuestions() {
+            const container = document.getElementById('quiz-questions-container');
+            container.innerHTML = activeQuizQuestions.map((q, idx) => {
+                const selectedIdx = userQuizAnswers[q.id];
+
+                return `
+                    <div class="p-5 sm:p-6 rounded-2xl bg-white border border-notion-border space-y-3.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-bold text-coursera-blue bg-coursera-light px-2.5 py-0.5 rounded-md">
+                                Câu ${idx + 1} / 10
+                            </span>
+                            <span class="text-[11px] font-medium text-notion-muted">Chuyên đề 0${q.topic}</span>
+                        </div>
+                        <h4 class="text-sm sm:text-base font-bold text-notion-text leading-snug">${escapeHTML(q.question)}</h4>
+                        <div class="space-y-2">
+                            ${q.options.map((opt, optIdx) => {
+                                let optStyle = 'border-notion-border hover:bg-notion-sidebar text-notion-text';
+                                let marker = String.fromCharCode(65 + optIdx);
+
+                                if (!isQuizSubmitted) {
+                                    if (selectedIdx === optIdx) {
+                                        optStyle = 'border-coursera-blue bg-coursera-light/70 text-coursera-blue font-semibold';
+                                    }
+                                } else {
+                                    if (optIdx === q.answer) {
+                                        optStyle = 'border-emerald-500 bg-emerald-50 text-emerald-900 font-semibold';
+                                    } else if (selectedIdx === optIdx && selectedIdx !== q.answer) {
+                                        optStyle = 'border-rose-400 bg-rose-50 text-rose-900';
+                                    } else {
+                                        optStyle = 'border-notion-border opacity-60 text-notion-muted';
+                                    }
+                                }
+
+                                return `
+                                    <button type="button" ${isQuizSubmitted ? 'disabled' : ''} onclick="selectQuizAnswer('${q.id}', ${optIdx})" class="w-full text-left p-3 rounded-xl border text-xs sm:text-sm flex items-start gap-3 transition ${optStyle}">
+                                        <span class="w-6 h-6 rounded-lg border border-current flex items-center justify-center text-xs font-bold shrink-0">${marker}</span>
+                                        <span class="pt-0.5">${escapeHTML(opt)}</span>
+                                    </button>
+                                `;
+                            }).join('')}
+                        </div>
+
+                        ${isQuizSubmitted ? `
+                            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-notion-text leading-relaxed">
+                                <strong class="${selectedIdx === q.answer ? 'text-emerald-700' : 'text-rose-700'}">
+                                    ${selectedIdx === q.answer ? '✓ Chính xác!' : '✕ Chưa chính xác.'}
+                                </strong>
+                                ${escapeHTML(q.explanation)}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectQuizAnswer(questionId, optionIdx) {
+            if (isQuizSubmitted) return;
+            userQuizAnswers[questionId] = optionIdx;
+            const answeredCount = Object.keys(userQuizAnswers).length;
+            document.getElementById('quiz-answered-count').textContent = `Đã trả lời: ${answeredCount}/10 câu`;
+            renderQuizQuestions();
+        }
+
+        function submitQuiz() {
+            const answeredCount = Object.keys(userQuizAnswers).length;
+            if (answeredCount < 10) {
+                showToast(`Bạn mới hoàn thành ${answeredCount}/10 câu. Hãy trả lời đủ 10 câu trước khi nộp!`, "error");
+                return;
+            }
+
+            clearInterval(quizTimerInterval);
+            isQuizSubmitted = true;
+
+            let score = 0;
+            activeQuizQuestions.forEach(q => {
+                if (userQuizAnswers[q.id] === q.answer) score++;
+            });
+
+            if (workspaceState.bestQuizScore === null || score > workspaceState.bestQuizScore) {
+                workspaceState.bestQuizScore = score;
+                saveWorkspaceState();
+                updateQuizBestBadge();
+            }
+
+            document.getElementById('quiz-submit-bar').classList.add('hidden');
+            const banner = document.getElementById('quiz-result-banner');
+            banner.classList.remove('hidden');
+
+            document.getElementById('quiz-score-headline').textContent = `Bạn đạt ${score}/10 điểm!`;
+            let feedback = "";
+            if (score >= 9) feedback = "Xuất sắc! Bạn đã nắm rất vững nền tảng CNTT & Kỷ nguyên Số 4.0.";
+            else if (score >= 7) feedback = "Kết quả tốt! Hãy xem lại phần giải thích ở các câu sai để hoàn thiện kiến thức.";
+            else feedback = "Bạn nên ôn lại các chuyên đề liên quan và luyện tập thêm với bộ thẻ Flashcards.";
+
+            document.getElementById('quiz-score-feedback').textContent = `Thời gian hoàn thành: ${document.getElementById('quiz-timer').textContent} • ${feedback}`;
+
+            renderQuizQuestions();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showToast(`Đã chấm điểm: ${score}/10 câu đúng!`, "success");
+        }
+
+        // 11. TIỆN ÍCH SIDEBAR MOBILE, MODAL & TOAST
+        function toggleLeftSidebar() {
+            const left = document.getElementById('left-sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            const isOpen = !left.classList.contains('-translate-x-full');
+            closeAllSidebars();
+            if (!isOpen) {
+                left.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            }
+        }
+
+        function toggleRightSidebar() {
+            const right = document.getElementById('right-sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            const isOpen = !right.classList.contains('translate-x-full');
+            closeAllSidebars();
+            if (!isOpen) {
+                right.classList.remove('translate-x-full');
+                overlay.classList.remove('hidden');
+            }
+        }
+
+        function closeAllSidebars() {
+            document.getElementById('left-sidebar').classList.add('-translate-x-full');
+            document.getElementById('right-sidebar').classList.add('translate-x-full');
+            document.getElementById('mobile-overlay').classList.add('hidden');
+        }
+
+        function openModal(id) {
+            const m = document.getElementById(id);
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeModal(id) {
+            const m = document.getElementById(id);
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const styles = {
+                success: 'bg-notion-text text-white border-slate-700',
+                error: 'bg-rose-700 text-white border-rose-600',
+                info: 'bg-coursera-blue text-white border-blue-600'
+            };
+            toast.className = `pointer-events-auto px-4 py-2.5 rounded-xl shadow-lg border text-xs font-semibold flex items-center gap-2 transition-all duration-300 translate-y-2 opacity-0 ${styles[type] || styles.info}`;
+            toast.innerHTML = `<span>${escapeHTML(message)}</span>`;
+            container.appendChild(toast);
+
+            requestAnimationFrame(() => toast.classList.remove('translate-y-2', 'opacity-0'));
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 2800);
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // Khởi chạy ứng dụng
+        window.addEventListener('DOMContentLoaded', initWorkspace);
+    </script>
+</body>
+</html>
